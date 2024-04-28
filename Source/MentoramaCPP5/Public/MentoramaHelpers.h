@@ -3,7 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Save_PlayerStatistics.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+
 #include "MentoramaHelpers.generated.h"
 
 /**
@@ -87,8 +89,26 @@ public:
 	static void ShuffleSortStringArray(UPARAM(ref) TArray<FString>& TargetArray, bool SortFirst, FString ItemToInsert); //M6 InsertionSort
 
 	UFUNCTION(BlueprintCallable, Category = "Helpers")
-	static void InsertionSort(UPARAM(ref)TArray<int>& TargetArray);																			//M6 InsertionSort RETORNO
+	static void InsertionSort(UPARAM(ref)TArray<int>& TargetArray);														//M6 InsertionSort RETORNO
 
 	inline static bool ConstPredicate(const FString Name1, const FString Name2);
+	
+	UFUNCTION(BlueprintCallable, Category = "CustomSave")
+	static void WriteUsernameToFile(FString Username);
 
+	UFUNCTION(BlueprintPure, Category = "CustomSave")
+	static FString ReadUsernameFromFile();
+	
+	static FString GetUsernameFileDataPath()
+	{
+		FString path = FPaths::GeneratedConfigDir() + FString("username.data"); //...saved/config/username.data
+		return path;
+	}
+
+	UFUNCTION(BlueprintCallable, Category = "CustomSave")
+	static void SavePlayerStatistics(int FailCount);
+
+	UFUNCTION(BlueprintCallable, Category = "CustomSave")
+	static int LoadPlayerStatistics();
+	
 };

@@ -3,7 +3,10 @@
 
 #include "MentoramaHelpers.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Misc/FileHelper.h"
 #include "Containers/UnrealString.h"
+#include "Save_PlayerStatistics.h"
+#include "Kismet/GameplayStatics.h"
 
 int UMentoramaHelpers::MySum(int a, int b, int c)
 {
@@ -253,4 +256,59 @@ void UMentoramaHelpers::InsertionSort(UPARAM(ref)TArray<int>& TargetArray)						
 		TargetArray[j + 1] = Escolhido;							//Quando n�o houver mais elementos maiores substitui o Escolhido pelo comparado no while
 	}
 
+}
+
+
+//MODULO 11 - WRITE IN A TEXT FILE
+void UMentoramaHelpers::WriteUsernameToFile(FString Username)
+{
+	FString path = GetUsernameFileDataPath();
+	//FString path = FPaths::GeneratedConfigDir() + FString("username.data"); //...saved/config/username.data
+	FFileHelper::SaveStringToFile(Username, *path);
+}
+
+//MODULO 11 - READ A TEXT FILE
+FString UMentoramaHelpers::ReadUsernameFromFile()
+{
+	FString path = GetUsernameFileDataPath();
+	TArray<FString> Result;
+
+	if(FFileHelper::LoadANSITextFileToStrings(*path, NULL, Result))
+	{
+		return Result[0];
+	}
+	else
+	{
+		return "None";
+	}
+}
+
+//MODULO 11 - CREATE A SAVE GAME OBJECT
+void UMentoramaHelpers::SavePlayerStatistics(int FailCount)
+{
+	USave_PlayerStatistics* SaveGame = Cast<USave_PlayerStatistics>(UGameplayStatics::LoadGameFromSlot(TEXT("PlayerStats"), 0));
+
+	if(!SaveGame)
+		SaveGame = Cast<USave_PlayerStatistics>(UGameplayStatics::CreateSaveGameObject(USave_PlayerStatistics::StaticClass()));
+
+	if(SaveGame)
+	{
+		SaveGame->FailCount = FailCount;
+		UGameplayStatics::SaveGameToSlot(SaveGame, TEXT("PlayerStats"), 0);
+	}
+}
+
+//MODULO 11 - LOAD SAVE GAME OBJECT
+int UMentoramaHelpers::LoadPlayerStatistics()
+{
+	USaveGame* SaveGame = UGameplayStatics::LoadGameFromSlot(TEXT("PlayerStats"), 0);
+	
+	if (const auto Save_PlayerStatistics = Cast<USave_PlayerStatistics>(SaveGame))
+	{
+		return Save_PlayerStatistics->FailCount;
+	}
+	else
+	{
+		return 0;
+	}
 }
