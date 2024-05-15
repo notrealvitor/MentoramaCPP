@@ -6,6 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "Ball.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnBallDestroyed, ABall*, Ball);
+
 UCLASS()
 class MENTORAMACPP5_API ABall : public AActor
 {
@@ -31,10 +33,23 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FVector LaunchDirection = FVector(0,cos(FMath::DegreesToRadians(LaunchAngle)), sin(FMath::DegreesToRadians(LaunchAngle)));
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	float LaunchSpeed = 1500;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	float LaunchAngle = 90;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	float CurrentSpeed;
+	
+	UFUNCTION(BlueprintImplementableEvent)
+	void DestroyFeedback();
+
+	UFUNCTION(BlueprintCallable)
+	void DestroyBall();
+
+	UPROPERTY(BlueprintAssignable)
+	FOnBallDestroyed OnBallDestroyed;
+
+	void Kill();
 };

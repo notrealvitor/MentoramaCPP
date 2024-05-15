@@ -10,6 +10,7 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FEnableLaunch);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FDisableLaunch);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FEndGame);
 
 class UInputMappingContext;
 DECLARE_LOG_CATEGORY_EXTERN(LogArkanoidCharacter, Log, All);
@@ -20,10 +21,20 @@ class MENTORAMACPP5_API AArkanoidPlayerController : public APlayerController
 	GENERATED_BODY()
 
 public:
+	virtual void BeginPlay() override;
+
+
 	ABall* SpawnBall();
 
-	void Tick(float DeltaSeconds) override;
+	UFUNCTION(BlueprintImplementableEvent)
+	void EventBallDestroyed();
 	
+	UFUNCTION(BlueprintCallable)
+	void DestroyBall(ABall* Ball);
+
+	void Tick(float DeltaSeconds) override;
+
+	UFUNCTION(BlueprintCallable)
 	void EnableLaunch();
 
 	void DisableLaunch();
@@ -40,13 +51,25 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	ABall* HoldingBall;
 
-	UPROPERTY(BlueprintAssignable, Category = "Test")
+	UPROPERTY(BlueprintAssignable)
 	FEnableLaunch OnEnableLaunch;
-	UPROPERTY(BlueprintAssignable, Category = "Test")
+	UPROPERTY(BlueprintAssignable)
 	FDisableLaunch OnDisableLaunch;
+	UPROPERTY(BlueprintAssignable)
+	FEndGame OnEndGame;
+	
+	int BricksCreated;
+	int BricksDestroyed;
 
+	void DestroyAllBalls();
+	
 protected:
-	virtual void BeginPlay() override;
+
+	TArray<ABall*> Balls;
+
+	UFUNCTION()
+	void OnBallDestroyed(ABall* ball);
+
 	
 private:
 

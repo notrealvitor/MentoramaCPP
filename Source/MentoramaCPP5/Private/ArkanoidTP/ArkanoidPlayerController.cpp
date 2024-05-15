@@ -1,11 +1,8 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "ArkanoidTP/ArkanoidPlayerController.h"
-
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "MentoramaCPP5Character.h"
+#include "ArkanoidTP/ArkanoidPlayerState.h"
 
 DEFINE_LOG_CATEGORY(LogArkanoidCharacter);
 
@@ -27,7 +24,24 @@ void AArkanoidPlayerController::BeginPlay()
 ABall* AArkanoidPlayerController::SpawnBall()
 {
 	auto* ball = GetWorld()->SpawnActor<ABall>(BallClass.Get());
+	Balls.Add(ball);
+	ball->OnBallDestroyed.AddDynamic(this, &AArkanoidPlayerController::OnBallDestroyed);
 	return ball;
+}
+
+void AArkanoidPlayerController::DestroyBall(ABall* Ball)
+{
+	GetPlayerState<AArkanoidPlayerState>()->Lives--;
+	EventBallDestroyed(); //this a workaround to pass the Lives value to the VM which is not in CPP yet
+	Ball->DestroyBall();
+	if (GetPlayerState<AArkanoidPlayerState>()->Lives)
+	{
+		EnableLaunch();
+	}
+	else
+	{
+		OnEndGame.Broadcast();
+	}
 }
 
 void AArkanoidPlayerController::EnableLaunch()
@@ -54,4 +68,24 @@ void AArkanoidPlayerController::LaunchHoldingBall()
 		DisableLaunch();
 	}
 }
+
+void AArkanoidPlayerController::DestroyAllBalls()
+{
+	for (auto* ball : Balls)
+	{
+		ball->Destroy();
+	}
+	Balls.Reset();
+}
+
+void AArkanoidPlayerController::OnBallDestroyed(ABall* ball)
+{
+	Balls.Remove(ball);
+	if (Balls.Num() <= 0)
+	{
+		//endround
+	}
+}
+
+
 

@@ -8,6 +8,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "Misc/App.h"
 #include "MentoramaCPP5Character.h"
+#include "GameFramework/GameSession.h"
 
 // Sets default values
 APlayerPaddler::APlayerPaddler()
@@ -18,7 +19,6 @@ APlayerPaddler::APlayerPaddler()
 void APlayerPaddler::BeginPlay()
 {
 	Super::BeginPlay();
-
 
 	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
 	{
