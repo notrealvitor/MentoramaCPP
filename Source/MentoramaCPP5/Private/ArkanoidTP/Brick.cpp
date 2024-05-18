@@ -28,10 +28,10 @@ void ABrick::NotifyHit(UPrimitiveComponent* MyComp, AActor* Other, UPrimitiveCom
 	}
 }
 
-int ABrick::GetScoreValue() const
-{
-	return 10;
-}
+// int ABrick::GetScoreValue()
+// {
+// 	return 10;
+// }
 
 
 

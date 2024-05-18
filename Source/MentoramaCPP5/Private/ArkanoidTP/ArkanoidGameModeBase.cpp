@@ -10,6 +10,7 @@
 #include "GameFramework/Actor.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Engine/Engine.h"
+#include "MentoramaHelpers.h"
 #include "Kismet/GameplayStatics.h"
 
 
@@ -27,7 +28,7 @@ void AArkanoidGameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
 	SpawnBrickManager();
-	StartRound(CurrentRound);
+	//StartRound(CurrentRound);
 }
 
 
@@ -37,15 +38,14 @@ void AArkanoidGameModeBase::EndRound() //This happens on AllBricksDestroyed
 	//CurrentRound++; // I like this more being controlled by the widget, this way the player can retry
 }
 
-void AArkanoidGameModeBase::StartRound(int Round)
+void AArkanoidGameModeBase::StartRound(int Round, int NRows, int NColumns, int BrickHealth)
 {
 	auto* PlayerController = Cast<AArkanoidPlayerController>(GetWorld()->GetFirstPlayerController());
 	check(PlayerController);
 	OnRoundStart.Broadcast(Round);
 
 	//PlayerController->DeleteAllBalls();
-	
-	BrickManager->SpawnBricks(10,2,1);
+	BrickManager->SpawnBricks(NRows,NColumns,BrickHealth);
 }
 
 void AArkanoidGameModeBase::SpawnBrickManager()

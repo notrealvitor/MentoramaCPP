@@ -96,7 +96,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "CustomSave")
 	static void WriteUsernameToFile(FString Username);
 
-	UFUNCTION(BlueprintPure, Category = "CustomSave")
+	UFUNCTION(BlueprintCallable, Category = "CustomSave")
 	static FString ReadUsernameFromFile();
 	
 	static FString GetUsernameFileDataPath()

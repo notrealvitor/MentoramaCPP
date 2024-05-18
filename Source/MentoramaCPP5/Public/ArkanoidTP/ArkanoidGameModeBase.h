@@ -35,14 +35,17 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnRoundStart OnRoundStart;
 
+	UPROPERTY(BlueprintReadWrite)
 	int CurrentRound = 0;
+
+	UFUNCTION(BlueprintCallable)
+	void StartRound(int Round, int NRows, int NColumns, int BrickHealth);
+
 	
 protected:
 
 	UFUNCTION()
 	void EndRound();
-
-	void StartRound(int Round);
 
 	void SpawnBrickManager();
 };

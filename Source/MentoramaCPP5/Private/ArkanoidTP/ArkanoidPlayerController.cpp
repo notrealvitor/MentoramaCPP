@@ -73,7 +73,10 @@ void AArkanoidPlayerController::DestroyAllBalls()
 {
 	for (auto* ball : Balls)
 	{
-		ball->Destroy();
+		if (ball)
+		{
+			ball->Destroy();
+		}		
 	}
 	Balls.Reset();
 }

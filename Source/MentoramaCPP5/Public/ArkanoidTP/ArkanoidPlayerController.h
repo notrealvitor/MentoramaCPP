@@ -61,11 +61,15 @@ public:
 	int BricksCreated;
 	int BricksDestroyed;
 
+	UFUNCTION(BlueprintCallable)
 	void DestroyAllBalls();
+
+	UPROPERTY(BlueprintReadOnly)
+	TArray<ABall*> Balls;
 	
 protected:
 
-	TArray<ABall*> Balls;
+	
 
 	UFUNCTION()
 	void OnBallDestroyed(ABall* ball);

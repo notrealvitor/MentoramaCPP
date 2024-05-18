@@ -63,11 +63,12 @@ void ABrickManager::HandleBrickDestroyed(ABrick* DestroyedBrick)
 
 void ABrickManager::ApplyScore(ABrick* DestroyedBrick)
 {
-	auto* playerController = GetWorld()->GetFirstPlayerController();
-	if (!IsValid(playerController)) return;
-	APlayerState* playerState = playerController->PlayerState;			//this wasnt building with auto*
-	if(!IsValid(playerState)) return;
-	playerState->SetScore(playerState->GetScore() + DestroyedBrick->GetScoreValue());
+	//this should be replaced to visual model
+	// auto* playerController = GetWorld()->GetFirstPlayerController();
+	// if (!IsValid(playerController)) return;
+	// APlayerState* playerState = playerController->PlayerState;			//this wasnt building with auto*
+	// if(!IsValid(playerState)) return;
+	//playerState->SetScore(playerState->GetScore() + DestroyedBrick->GetScoreValue());
 }
 
 

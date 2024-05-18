@@ -31,7 +31,8 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnBrickDestroyed OnBrickDestroyed;
 
-	int GetScoreValue() const;
+	// UFUNCTION(BlueprintCallable) calling this in the editor is causing some terrible editor corruption (I was calling it after the destroy)
+	// int GetScoreValue();
 	
 	UPROPERTY(BlueprintReadWrite)
 	float TimeForFeedbackDestroy = 0.1f;
