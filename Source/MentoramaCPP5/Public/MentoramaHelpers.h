@@ -98,10 +98,19 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "CustomSave")
 	static FString ReadUsernameFromFile();
-	
+
+	UFUNCTION(BlueprintCallable, Category = "Arkanoid")
+	static FString ReadArkanoidLevelsFromFile();
+
 	static FString GetUsernameFileDataPath()
 	{
 		FString path = FPaths::GeneratedConfigDir() + FString("username.data"); //...saved/config/username.data
+		return path;
+	}
+
+	static FString GetArkanoidLevelsFileDataPath()
+	{
+		FString path = FPaths::ProjectDir() + FString("Config/ArkanoidLevels.data");
 		return path;
 	}
 

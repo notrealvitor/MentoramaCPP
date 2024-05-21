@@ -45,16 +45,16 @@ void APlayerPaddler::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	}
 }
 
-
-
 void APlayerPaddler::HorizontalMove(const FInputActionValue& Value)
 {
+	
 	if (Controller != nullptr)
 	{
-		const FVector movementInput = ConsumeMovementInputVector();
-		//AddActorLocalOffset(movementInput * MoveSpeed , true);
-		AddActorWorldOffset(FVector(0, Value.Get<float>() * MoveSpeed * FApp::GetDeltaTime(), 0), true);
-		//UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' FailedMovementInput A or S"), *movementInput.ToString());		//log print  example with string
+		//const FVector movementInput = ConsumeMovementInputVector();
+		AddActorLocalOffset(FVector(0, Value.Get<float>() * MoveSpeed * FApp::GetDeltaTime(), 0), true);
+		//AddActorWorldOffset(FVector(0, Value.Get<float>() * MoveSpeed * FApp::GetDeltaTime(), 0), true); //this was causing the collision to be ignored
+		//AddMovementInput(FVector::ForwardVector, Value.Get<float>() * MoveSpeed * FApp::GetDeltaTime());
+		//UE_LOG(LogTemplateCharacter, Error, TEXT("'%f' FailedMovementInput A or S"), Value.Get<float>() * MoveSpeed * FApp::GetDeltaTime());		//log print  example with string
 		//UE_LOG(LogTemplateCharacter, Error, TEXT("'%f' FailedMovementInput A or S"), Value.Get<float>());				//log print example with float
 	}
 }

@@ -283,6 +283,21 @@ FString UMentoramaHelpers::ReadUsernameFromFile()
 	}
 }
 
+FString UMentoramaHelpers::ReadArkanoidLevelsFromFile()
+{
+	FString path = GetArkanoidLevelsFileDataPath();
+	TArray<FString> Result;
+
+	if(FFileHelper::LoadANSITextFileToStrings(*path, NULL, Result))
+	{
+		return Result[0];
+	}
+	else
+	{
+		return "None";
+	}
+}
+
 //MODULO 11 - CREATE A SAVE GAME OBJECT
 void UMentoramaHelpers::SavePlayerStatistics(int FailCount)
 {

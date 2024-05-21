@@ -43,7 +43,7 @@ public:
 	void LaunchHoldingBall();
 
 	UPROPERTY(EditAnywhere, Category = Ball)
-	FVector OffsetSpawnInitialBall = FVector(0,0,40);
+	FVector OffsetSpawnInitialBall = FVector(0,0,80);
 
 	UPROPERTY(EditAnywhere, Category = Ball)
 	TSubclassOf<ABall> BallClass;

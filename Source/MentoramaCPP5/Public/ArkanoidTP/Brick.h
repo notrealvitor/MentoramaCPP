@@ -18,21 +18,21 @@ public:
 	ABrick();
 
 	virtual void NotifyHit(UPrimitiveComponent* MyComp, AActor* Other, UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit) override;
-
+	
 	UPROPERTY(BlueprintReadWrite)
 	int Health;
 	
 	UPROPERTY(BlueprintAssignable)
 	FOnBrickHit	OnBrickHit;
-
+	
 	UFUNCTION(BlueprintImplementableEvent)
 	void DestroyFeedback();
-
+	
 	UPROPERTY(BlueprintAssignable)
 	FOnBrickDestroyed OnBrickDestroyed;
 
-	// UFUNCTION(BlueprintCallable) calling this in the editor is causing some terrible editor corruption (I was calling it after the destroy)
-	// int GetScoreValue();
+	UFUNCTION(BlueprintCallable) //calling this in the editor is causing some terrible editor corruption (I was calling it after the destroy)
+	int GetScoreValue();
 	
 	UPROPERTY(BlueprintReadWrite)
 	float TimeForFeedbackDestroy = 0.1f;
