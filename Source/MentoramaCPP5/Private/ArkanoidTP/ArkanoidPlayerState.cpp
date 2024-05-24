@@ -3,8 +3,3 @@
 
 #include "ArkanoidTP/ArkanoidPlayerState.h"
 
-void AArkanoidPlayerState::BeginPlay()
-{
-	Super::BeginPlay();
-	Lives = StartingLives;
-}

@@ -14,15 +14,5 @@ class MENTORAMACPP5_API AArkanoidPlayerState : public APlayerState
 {
 	GENERATED_BODY()
 
-public:
-
-	virtual void BeginPlay() override;
-	
-	UPROPERTY(BlueprintReadOnly, EditAnywhere)
-	int StartingLives = 3;
-	
-	UPROPERTY(BlueprintReadWrite)
-	int Lives;
-
 	
 };

@@ -6,6 +6,8 @@
 #include "Ball.h"
 #include "InputAction.h"
 #include "GameFramework/PlayerController.h"
+#include "NotPlayerProperties.h"
+#include "MentoramaGameInstance.h"
 #include "ArkanoidPlayerController.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FEnableLaunch);
@@ -22,59 +24,50 @@ class MENTORAMACPP5_API AArkanoidPlayerController : public APlayerController
 
 public:
 	virtual void BeginPlay() override;
-
-
-	ABall* SpawnBall();
-
-	UFUNCTION(BlueprintImplementableEvent)
-	void EventBallDestroyed();
-	
-	UFUNCTION(BlueprintCallable)
-	void DestroyBall(ABall* Ball);
-
 	void Tick(float DeltaSeconds) override;
 
-	UFUNCTION(BlueprintCallable)
-	void EnableLaunch();
-
-	void DisableLaunch();
-	
-	
-	void LaunchHoldingBall();
-
-	UPROPERTY(EditAnywhere, Category = Ball)
-	FVector OffsetSpawnInitialBall = FVector(0,0,80);
-
+	// Balls
 	UPROPERTY(EditAnywhere, Category = Ball)
 	TSubclassOf<ABall> BallClass;
-
+	UPROPERTY(EditAnywhere, Category = Ball)
+	FVector OffsetSpawnInitialBall = FVector(0,0,80);
+	ABall* SpawnBall();
 	UPROPERTY(BlueprintReadWrite)
 	ABall* HoldingBall;
-
+	void LaunchHoldingBall();
+	UFUNCTION(BlueprintCallable)
+	void DestroyBall(ABall* Ball);
+	UPROPERTY(BlueprintReadOnly)
+	TArray<ABall*> Balls;
+	UFUNCTION(BlueprintCallable)
+	void DestroyAllBalls();
+	UFUNCTION(BlueprintImplementableEvent)
+	void EventBallDestroyed();
+	UPROPERTY(BlueprintReadWrite)
+	int SpawnBallDamage = 1;
+	
+	//Launching the ball
+	int CurrentLives = 77; //if it shows 77 values are not being set
+	UFUNCTION(BlueprintCallable)
+	void EnableLaunch();
+	void DisableLaunch();
 	UPROPERTY(BlueprintAssignable)
 	FEnableLaunch OnEnableLaunch;
 	UPROPERTY(BlueprintAssignable)
 	FDisableLaunch OnDisableLaunch;
 	UPROPERTY(BlueprintAssignable)
 	FEndGame OnEndGame;
+	UPROPERTY(BlueprintReadWrite)
+	bool GameRunning = true;
 	
+	//Bricks
 	int BricksCreated;
 	int BricksDestroyed;
 
-	UFUNCTION(BlueprintCallable)
-	void DestroyAllBalls();
-
+	//System References
 	UPROPERTY(BlueprintReadOnly)
-	TArray<ABall*> Balls;
-	
-protected:
-
-	
-
-	UFUNCTION()
-	void OnBallDestroyed(ABall* ball);
-
-	
-private:
+	UNotPlayerProperties* VM_NotPlayerProperties;
+	UPROPERTY()
+	UMentoramaGameInstance* MyMentoramaGameInstance;
 
 };

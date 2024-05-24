@@ -12,12 +12,14 @@ UNotPlayerProperties::UNotPlayerProperties()
 	MapResource = 0;
 	TotalCurrency = 0;
 	CurrentCurrency = 0;
+	CurrentRound = 0;
 }
 
 void UNotPlayerProperties::PostInitProperties()
 {
 	Super::PostInitProperties();
 
+	
 	// Initialize any properties or do any setup here after all properties have been initialized
 }
 

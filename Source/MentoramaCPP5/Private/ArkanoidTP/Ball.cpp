@@ -50,9 +50,7 @@ void ABall::Launch()
 {
 	LaunchDirection = FVector(0,cos(FMath::DegreesToRadians(LaunchAngle)), sin(FMath::DegreesToRadians(LaunchAngle)));				//update
 	//UE_LOG(LogTemplateCharacter, Error, TEXT("LaunchDirection '%s' and Launch Angle %f"), *LaunchDirection.ToString(), LaunchAngle);				//log print with two examples with float and vector3
-
 	Sphere->AddImpulse(LaunchDirection * LaunchSpeed, NAME_None, true);
-
 	CurrentSpeed = LaunchSpeed;
 }
 

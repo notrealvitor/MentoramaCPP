@@ -24,6 +24,9 @@ public:
 	FText Description;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	AArkanoidAbilityActor* AbilityActorToSpawn;
+	TSubclassOf<AArkanoidAbilityActor> AbilityActorToSpawn;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UTexture2D* ImageTexture;
 	
 };

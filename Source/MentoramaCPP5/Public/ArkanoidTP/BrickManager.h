@@ -4,7 +4,6 @@
 #include "GameFramework/Actor.h"
 #include "ArkanoidTP/Brick.h"
 #include "BrickManager.generated.h"
-
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAllBricksDestroyed);
 
 UCLASS()

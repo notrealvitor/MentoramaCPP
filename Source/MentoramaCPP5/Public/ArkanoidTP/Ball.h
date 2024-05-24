@@ -52,4 +52,7 @@ public:
 	FOnBallDestroyed OnBallDestroyed;
 
 	void Kill();
+
+	UPROPERTY(BlueprintReadWrite)
+	int BallDamage = 1;
 };
