@@ -76,17 +76,17 @@ void AAI_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 void AAI_Character::TakingDamage(float Damage)
 {
-	S_AIData.Health -= Damage;
-	SetHealthState();
-	if (S_AIData.Health <= .0f)
-	{
-		auto* gameMode = GetWorld()->GetAuthGameMode<AMyCppBaseMode>();
-		if(IsValid(gameMode))
+		S_AIData.Health -= Damage;
+		SetHealthState();
+		if (S_AIData.Health <= .0f)
 		{
-			gameMode->RegisterObjective();
+			auto* gameMode = GetWorld()->GetAuthGameMode<AMyCppBaseMode>();
+			if(IsValid(gameMode))
+			{
+				gameMode->RegisterObjective();
+			}
+			Destroy();
 		}
-		Destroy();
-	}
 }
 
 void AAI_Character::Idle()
@@ -213,5 +213,11 @@ void AAI_Character::OnMovementFinished()
 {
 	TimePassed = 0;
 	//PrintAction(FString::Printf(TEXT("MOVEMENT FINISHED")), 0);
+}
+
+void AAI_Character::InteractionAction_Implementation()
+{
+	// Your implementation here
+	UE_LOG(LogTemp, Warning, TEXT("InteractionAction called from AI_Character"));
 }
 

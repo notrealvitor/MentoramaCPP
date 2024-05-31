@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
+#include "StealthGame/Interactions.h"
 #include "MentoramaCPP5Character.generated.h"
 
 class USpringArmComponent;
@@ -16,7 +17,7 @@ struct FInputActionValue;
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
 UCLASS(config=Game)
-class AMentoramaCPP5Character : public ACharacter
+class AMentoramaCPP5Character : public ACharacter ,public IInteractions
 {
 	GENERATED_BODY()
 
@@ -47,7 +48,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* LookAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* InteractAction;
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void InteractionSuccessful();
 
 protected:
 
@@ -70,5 +75,16 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+	void TraceCheckForward() ;
+
+	UFUNCTION(BlueprintImplementableEvent)
+	USceneComponent* GetCamera() const;
+
+	virtual void InteractionAction_Implementation() override; // dont forget to add the public IInteractions into the class call
+
+	UPROPERTY(BlueprintReadWrite)
+	bool bIsAlive = true;
+	
 };
 

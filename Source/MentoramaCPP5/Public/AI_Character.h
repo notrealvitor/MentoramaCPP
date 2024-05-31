@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "StealthGame/Interactions.h"
 #include "GameFramework/Character.h"
 #include "AI_Character.generated.h"
 
@@ -39,7 +40,7 @@ private:
 };
 
 UCLASS()
-class MENTORAMACPP5_API AAI_Character : public ACharacter
+class MENTORAMACPP5_API AAI_Character : public ACharacter ,public IInteractions
 {
 	GENERATED_BODY()
 
@@ -130,4 +131,7 @@ public:
 	
 	UFUNCTION()
 	FVector RotateMyVector(const FVector& VectorToRotate, const FRotator& Rotation);
+
+	virtual void InteractionAction_Implementation() override; // dont forget to add the public IInteractions into the class call
+
 };

@@ -324,6 +324,7 @@ int UMentoramaHelpers::LoadPlayerStatistics()
 	}
 	else
 	{
+		//SavePlayerStatistics(0); // in the stealth gm, this slot is created in the defeat score_stealth. it is giving a warning, should rethink this when rework the score
 		return 0;
 	}
 }

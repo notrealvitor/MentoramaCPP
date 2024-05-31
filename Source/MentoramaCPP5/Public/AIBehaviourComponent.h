@@ -54,4 +54,7 @@ public:
 	float TimeBeforeTurn = 3;
 	
 	AAI_Character* OwnerAICharacter;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	bool bIsAlive = true;
 };

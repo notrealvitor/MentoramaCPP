@@ -86,6 +86,9 @@ void AMentoramaCPP5Character::SetupPlayerInputComponent(UInputComponent* PlayerI
 
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AMentoramaCPP5Character::Look);
+
+		// Interact
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &AMentoramaCPP5Character::TraceCheckForward);
 	}
 	else
 	{
@@ -127,4 +130,33 @@ void AMentoramaCPP5Character::Look(const FInputActionValue& Value)
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
+}
+
+void AMentoramaCPP5Character::TraceCheckForward() 
+{
+	auto* camera = GetCamera();
+	FVector start = GetActorLocation(); //camera->GetComponentLocation();
+	FVector end = start + GetActorForwardVector() * 100; //start + camera->GetForwardVector()*100;
+	FHitResult result;
+	FCollisionQueryParams queryParams;
+	queryParams.AddIgnoredActor(this);
+
+	// Draw debug line to visualize the trace
+	DrawDebugLine(GetWorld(), start, end, FColor::Red, false, 1, 0, 5);
+	
+	if(GetWorld()->LineTraceSingleByChannel(result, start, end, ECollisionChannel::ECC_WorldDynamic, queryParams))
+	{
+		if (result.GetActor() && result.GetActor()->GetClass()->ImplementsInterface(UInteractions::StaticClass()))
+		{
+			IInteractions::Execute_InteractionAction(result.GetActor());
+			InteractionSuccessful();
+			UE_LOG(LogTemp, Warning, TEXT("InteractionAction from MentoramaMyCPPCharacter"));
+		}
+	};
+}
+
+void AMentoramaCPP5Character::InteractionAction_Implementation()
+{
+	// Your implementation here
+	UE_LOG(LogTemp, Warning, TEXT("InteractionAction called into MentoramaMyCPPCharacter"));
 }

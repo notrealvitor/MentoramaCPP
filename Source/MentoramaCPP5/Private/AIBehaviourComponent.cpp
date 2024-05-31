@@ -30,14 +30,14 @@ void UAIBehaviourComponent::BeginPlay()
 void UAIBehaviourComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	if(bCanMove)
+	if(bCanMove&&bIsAlive)
 	{
 		EnemyBehaviour(DeltaTime);
 	}
 	// ...
 }
 
-void UAIBehaviourComponent::EnemyBehaviour(float DeltaTime)        //Exerc�cio do M7
+void UAIBehaviourComponent::EnemyBehaviour(float DeltaTime)   //Exerc�cio do M7
 {
 	if (!OwnerAICharacter)   //Cancel the Move if the OwnerCharacterIsNotValid
 	{

@@ -5,13 +5,14 @@
 #include "CoreMinimal.h"
 #include "MentoramaCPP5Character.h"
 #include "GameFramework/Character.h"
+
 #include "MyCPPCharacter.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMyHealthChanged, int, NewHealth);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMyCollectiblesChanged, int, NewCollectibles);
 
 UCLASS()
-class MENTORAMACPP5_API AMyCPPCharacter : public AMentoramaCPP5Character
+class MENTORAMACPP5_API AMyCPPCharacter : public AMentoramaCPP5Character 
 {
 	GENERATED_BODY()
 
@@ -53,5 +54,9 @@ public:
     bool CanControl;
 
 	TArray<AActor> Characters;
+	
+
+
+
 };
 

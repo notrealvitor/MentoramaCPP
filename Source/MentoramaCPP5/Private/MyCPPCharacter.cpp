@@ -53,3 +53,8 @@ void AMyCPPCharacter::HandleCollectibles(int Collected)
 	Collectibles += Collected;
 	OnMyCollectiblesChanged.Broadcast(Collectibles);
 }
+
+
+
+
+
