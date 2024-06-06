@@ -29,6 +29,7 @@ void UInventoryComponent::BeginPlay()
 	if (MyMentoramaGameInstance)
 	{
 		VM_NotPlayerProperties = MyMentoramaGameInstance->VM_NotPlayerProperties;
+		UpdateVisualModel();
 	}
 	else
 	{

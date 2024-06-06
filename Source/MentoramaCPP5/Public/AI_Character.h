@@ -33,7 +33,7 @@ struct FEnemyData
 	FString Name = "Ai Guy";
 };
 
-class Weapon // m7 explicação
+class Weapon // m7 explicacao
 {
 public:
 	Weapon(); //constructor chamado ao iniciar
