@@ -16,6 +16,8 @@ struct FInputActionValue;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCurrentInteractionsChanged, TScriptInterface<IInteractions>, NewInteractible);
+
 UCLASS(config=Game)
 class AMentoramaCPP5Character : public ACharacter ,public IInteractions
 {
@@ -70,21 +72,34 @@ protected:
 	// To add mapping context
 	virtual void BeginPlay();
 
+	virtual void Tick(float DeltaSeconds) override;
+
 public:
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
-	void TraceCheckForward() ;
+	void Interact() ;
 
 	UFUNCTION(BlueprintImplementableEvent)
 	USceneComponent* GetCamera() const;
 
-	virtual void InteractionAction_Implementation() override; // dont forget to add the public IInteractions into the class call
-
+	virtual void InteractionAction_Implementation(AActor* Interactor) override; // dont forget to add the public IInteractions into the class call
+	
 	UPROPERTY(BlueprintReadWrite)
 	bool bIsAlive = true;
+
+	bool bTraceIsHit;
 	
+	FHitResult TraceResult;
+
+	void AimTrace(bool Debug);
+
+	UPROPERTY(BlueprintAssignable)
+	FOnCurrentInteractionsChanged OnCurrentInteractionsChanged;
+
+	UPROPERTY(BlueprintReadOnly)
+	TScriptInterface<IInteractions> CurrentInteractable;
 };
 

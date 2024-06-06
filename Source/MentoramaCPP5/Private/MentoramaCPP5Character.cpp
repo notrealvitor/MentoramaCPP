@@ -10,6 +10,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "EntitySystem/MovieSceneEntitySystemRunner.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -69,6 +70,12 @@ void AMentoramaCPP5Character::BeginPlay()
 	}
 }
 
+void AMentoramaCPP5Character::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+	AimTrace(false);
+}
+
 //////////////////////////////////////////////////////////////////////////
 // Input
 
@@ -88,7 +95,7 @@ void AMentoramaCPP5Character::SetupPlayerInputComponent(UInputComponent* PlayerI
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AMentoramaCPP5Character::Look);
 
 		// Interact
-		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &AMentoramaCPP5Character::TraceCheckForward);
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &AMentoramaCPP5Character::Interact);
 	}
 	else
 	{
@@ -132,31 +139,57 @@ void AMentoramaCPP5Character::Look(const FInputActionValue& Value)
 	}
 }
 
-void AMentoramaCPP5Character::TraceCheckForward() 
+void AMentoramaCPP5Character::Interact() 
 {
-	auto* camera = GetCamera();
-	FVector start = GetActorLocation(); //camera->GetComponentLocation();
-	FVector end = start + GetActorForwardVector() * 100; //start + camera->GetForwardVector()*100;
-	FHitResult result;
-	FCollisionQueryParams queryParams;
-	queryParams.AddIgnoredActor(this);
-
-	// Draw debug line to visualize the trace
-	DrawDebugLine(GetWorld(), start, end, FColor::Red, false, 1, 0, 5);
-	
-	if(GetWorld()->LineTraceSingleByChannel(result, start, end, ECollisionChannel::ECC_WorldDynamic, queryParams))
+	if (bTraceIsHit && TraceResult.GetActor()->Implements<UInteractions>())
 	{
-		if (result.GetActor() && result.GetActor()->GetClass()->ImplementsInterface(UInteractions::StaticClass()))
-		{
-			IInteractions::Execute_InteractionAction(result.GetActor());
-			InteractionSuccessful();
-			UE_LOG(LogTemp, Warning, TEXT("InteractionAction from MentoramaMyCPPCharacter"));
-		}
-	};
+		IInteractions::Execute_InteractionAction(CurrentInteractable.GetObject(), this); //sends the message to the interacted actor
+		InteractionSuccessful();  //this sends a message to this characters BP that the event was successful
+//		UE_LOG(LogTemp, Warning, TEXT("InteractionAction from MentoramaMyCPPCharacter, %f"),FVector::Dist(GetActorLocation(), TraceResult.GetActor()->GetActorLocation())); // cant get location anymore due to the object being destroyed
+	}
 }
 
-void AMentoramaCPP5Character::InteractionAction_Implementation()
+void AMentoramaCPP5Character::InteractionAction_Implementation(AActor* Interactor)
 {
 	// Your implementation here
 	UE_LOG(LogTemp, Warning, TEXT("InteractionAction called into MentoramaMyCPPCharacter"));
 }
+
+void AMentoramaCPP5Character::AimTrace(bool Debug)
+{	
+	FVector StartLocation;
+	FRotator Direction;
+	GetController()->GetPlayerViewPoint(StartLocation, Direction);
+
+	float TraceRange = 600;
+
+	StartLocation = StartLocation +  Direction.Vector() * FVector::Dist(GetActorLocation(), StartLocation);
+	FVector EndTraceController = StartLocation + Direction.Vector() * TraceRange;
+	FCollisionQueryParams queryParams;
+	queryParams.AddIgnoredActor(this);
+	bTraceIsHit = GetWorld()->LineTraceSingleByChannel(TraceResult, StartLocation, EndTraceController, ECollisionChannel::ECC_WorldDynamic, queryParams);
+
+	//set the InteractingObject
+	if (bTraceIsHit && TraceResult.GetActor()->Implements<UInteractions>())
+	{
+		if (CurrentInteractable.GetObject() != TraceResult.GetActor() )
+		{
+		CurrentInteractable = TraceResult.GetActor();
+		OnCurrentInteractionsChanged.Broadcast(CurrentInteractable);
+		}
+	}
+	else if (CurrentInteractable.GetObject()) //does it have to have a IsValid or it is enought like this
+	{
+		CurrentInteractable = nullptr;
+		OnCurrentInteractionsChanged.Broadcast(CurrentInteractable);
+	}
+	
+	// Draw debug line to visualize the trace
+	if (Debug)
+	{
+		DrawDebugLine(GetWorld(), StartLocation, EndTraceController, FColor::Yellow, false, 1, 0, 2);
+	}
+
+}
+
+

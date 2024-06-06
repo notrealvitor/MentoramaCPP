@@ -10,6 +10,7 @@
 #include "MyCPPCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "MyCppBaseMode.h"
+#include "AIBehaviourComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Navigation/PathFollowingComponent.h"
 
@@ -22,6 +23,12 @@ AAI_Character::AAI_Character()
 	damageSphere = CreateDefaultSubobject<USphereComponent>("DamageSphere");
 	damageSphere->SetupAttachment(RootComponent);
 	damageSphere->OnComponentBeginOverlap.AddDynamic(this, &AAI_Character::HandleDamageSphereHit);
+
+	// Create the custom component and attach it to the actor
+	AIBehaviourComp = CreateDefaultSubobject<UAIBehaviourComponent>(TEXT("AIBehaviourComponent"));
+	//AddInstanceComponent(AIBehaviourComp);
+	AddOwnedComponent(AIBehaviourComp);
+	//AIBehaviourComp->RegisterComponent();
 }
 
 Weapon::Weapon()
@@ -44,18 +51,26 @@ void AAI_Character::BeginPlay()
 	SetHealthState();
 
 	Calculations* calculations = new Calculations();
-	StartingCharacterPoint = (Cast<AMyAIController>(GetController())->StartingPoint);
-	StartingCharacterRotation = GetActorRotation();
-	MarkedPoint = RotateMyVector(PatrolPoint, GetActorRotation())+GetActorLocation();
-	if(bUsePatrolPoint)
+	AMyAIController* MyAIController = Cast<AMyAIController>(GetController());
+	if (MyAIController)
 	{
-		Direction = PatrolPoint;
-	}
+		StartingCharacterPoint = (MyAIController->StartingPoint);
+		StartingCharacterRotation = GetActorRotation();
+		MarkedPoint = RotateMyVector(PatrolPoint, GetActorRotation())+GetActorLocation();
+		if(bUsePatrolPoint)
+		{
+			Direction = PatrolPoint;
+		}
 
-	auto* gameMode = GetWorld()->GetAuthGameMode<AMyCppBaseMode>();
-	if(IsValid(gameMode))
+		auto* gameMode = GetWorld()->GetAuthGameMode<AMyCppBaseMode>();
+		if(IsValid(gameMode))
+		{
+			gameMode->RegisterObjective();
+		}
+	}
+	else
 	{
-		gameMode->RegisterObjective();
+		UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("AI %s has no controller"), *GetName()), true, true, FColor::Red, 1.0f);
 	}
 }
 
@@ -91,7 +106,7 @@ void AAI_Character::TakingDamage(float Damage)
 
 void AAI_Character::Idle()
 {
-	PrintAction("Idle", 0);
+	//PrintAction("Idle", 0);
 }
 
 // Rotate a vector using a rotation represented by FRotator
@@ -215,7 +230,7 @@ void AAI_Character::OnMovementFinished()
 	//PrintAction(FString::Printf(TEXT("MOVEMENT FINISHED")), 0);
 }
 
-void AAI_Character::InteractionAction_Implementation()
+void AAI_Character::InteractionAction_Implementation(AActor* Interactor)
 {
 	// Your implementation here
 	UE_LOG(LogTemp, Warning, TEXT("InteractionAction called from AI_Character"));

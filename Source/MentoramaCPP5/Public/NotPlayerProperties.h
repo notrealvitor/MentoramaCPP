@@ -4,7 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "MVVMViewModelBase.h"
+#include "StealthGame/InventoryComponent.h"
 #include "NotPlayerProperties.generated.h"
+
 
 UCLASS()
 class MENTORAMACPP5_API UNotPlayerProperties : public UMVVMViewModelBase
@@ -33,13 +35,18 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, FieldNotify, Setter, Getter)
 	int CurrentCurrency;
 
+	// Another integer variable with Field Notify
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, FieldNotify, Setter, Getter)
+	TArray<FInventorySlot> InventorySlots;
+
 	
 
 protected:
 	virtual void PostInitProperties() override;
 
 public:
-	
+
+//TotalMapTime
 	void SetTotalMapTime(float NewTotalMapTime)
 	{
 		UE_MVVM_SET_PROPERTY_VALUE(TotalMapTime, NewTotalMapTime);
@@ -49,7 +56,7 @@ public:
 	{
 		return TotalMapTime;
 	}
-
+//SetFailContext
 	void SetFailContext(int32 NewFailContext)
 	{
 		UE_MVVM_SET_PROPERTY_VALUE(FailContext, NewFailContext);
@@ -59,7 +66,7 @@ public:
 	{
 		return FailContext;
 	}
-
+//CurrentRound
 	void SetCurrentRound(int32 NewCurrentRound)
 	{
 		UE_MVVM_SET_PROPERTY_VALUE(CurrentRound, NewCurrentRound);
@@ -79,7 +86,7 @@ public:
 	{
 		return MapResource;
 	}
-
+//TotalCurrency
 	void SetTotalCurrency(int32 NewTotalCurrency)
 	{
 		UE_MVVM_SET_PROPERTY_VALUE(CurrentRound, NewTotalCurrency);
@@ -89,7 +96,7 @@ public:
 	{
 		return CurrentRound;
 	}
-
+//Current Currency
 	void SetCurrentCurrency(int32 NewCurrentCurrency)
 	{
 		UE_MVVM_SET_PROPERTY_VALUE(CurrentCurrency, NewCurrentCurrency);
@@ -99,4 +106,16 @@ public:
 	{
 		return CurrentCurrency;
 	}
+
+//InventorySlots
+	void SetInventorySlots(const TArray<FInventorySlot>& NewInventorySlots)
+	{
+		UE_MVVM_SET_PROPERTY_VALUE(InventorySlots, NewInventorySlots);
+	}
+
+	const TArray<FInventorySlot>& GetInventorySlots() const
+	{
+		return InventorySlots;
+	}
+	
 };

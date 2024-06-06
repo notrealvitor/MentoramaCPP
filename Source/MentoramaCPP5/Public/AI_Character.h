@@ -5,7 +5,12 @@
 #include "CoreMinimal.h"
 #include "StealthGame/Interactions.h"
 #include "GameFramework/Character.h"
+
 #include "AI_Character.generated.h"
+
+ // Forward declaration to avoid circular dependency
+class UAIBehaviourComponent;
+
 
 UENUM(BlueprintType)
 enum EHealthState
@@ -38,6 +43,7 @@ public:
 private:
 	const int AmmoMagazine = 30;
 };
+
 
 UCLASS()
 class MENTORAMACPP5_API AAI_Character : public ACharacter ,public IInteractions
@@ -132,6 +138,9 @@ public:
 	UFUNCTION()
 	FVector RotateMyVector(const FVector& VectorToRotate, const FRotator& Rotation);
 
-	virtual void InteractionAction_Implementation() override; // dont forget to add the public IInteractions into the class call
+	virtual void InteractionAction_Implementation(AActor* Interactor) override; // dont forget to add the public IInteractions into the class call
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
+	UAIBehaviourComponent* AIBehaviourComp;
 
 };

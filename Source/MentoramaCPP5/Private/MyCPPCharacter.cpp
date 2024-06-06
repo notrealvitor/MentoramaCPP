@@ -5,8 +5,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "MyCppBaseMode.h"
 
-
-
 // Sets default values
 AMyCPPCharacter::AMyCPPCharacter()
 {

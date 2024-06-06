@@ -57,4 +57,6 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	bool bIsAlive = true;
+
+
 };

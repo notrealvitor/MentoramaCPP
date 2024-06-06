@@ -20,5 +20,9 @@ class MENTORAMACPP5_API IInteractions
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-	void InteractionAction();
+	void InteractionAction(AActor* Interactor);
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	FText GetInteractionDescription() const;
+
 };
