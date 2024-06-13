@@ -11,7 +11,6 @@
  // Forward declaration to avoid circular dependency
 class UAIBehaviourComponent;
 
-
 UENUM(BlueprintType)
 enum EHealthState
 {
@@ -138,7 +137,7 @@ public:
 	UFUNCTION()
 	FVector RotateMyVector(const FVector& VectorToRotate, const FRotator& Rotation);
 
-	virtual void InteractionAction_Implementation(AActor* Interactor) override; // dont forget to add the public IInteractions into the class call
+	virtual void InteractionAction_Implementation(AActor* Interactor, UItemSlot* InteractorItem) override; // dont forget to add the public IInteractions into the class call
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
 	UAIBehaviourComponent* AIBehaviourComp;

@@ -95,7 +95,7 @@ void AMentoramaCPP5Character::SetupPlayerInputComponent(UInputComponent* PlayerI
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AMentoramaCPP5Character::Look);
 
 		// Interact
-		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &AMentoramaCPP5Character::Interact);
+		//EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &AMentoramaCPP5Character::Interact);
 	}
 	else
 	{
@@ -108,7 +108,7 @@ void AMentoramaCPP5Character::Move(const FInputActionValue& Value)
 	// input is a Vector2D
 	FVector2D MovementVector = Value.Get<FVector2D>();
 
-	if (Controller != nullptr)
+	if (Controller != nullptr && !AbilityPlaying)
 	{
 		// find out which way is forward
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -141,15 +141,18 @@ void AMentoramaCPP5Character::Look(const FInputActionValue& Value)
 
 void AMentoramaCPP5Character::Interact() 
 {
-	if (bTraceIsHit && TraceResult.GetActor()->Implements<UInteractions>())
+	if (!AbilityPlaying)
 	{
-		IInteractions::Execute_InteractionAction(CurrentInteractable.GetObject(), this); //sends the message to the interacted actor
-		InteractionSuccessful();  //this sends a message to this characters BP that the event was successful
-//		UE_LOG(LogTemp, Warning, TEXT("InteractionAction from MentoramaMyCPPCharacter, %f"),FVector::Dist(GetActorLocation(), TraceResult.GetActor()->GetActorLocation())); // cant get location anymore due to the object being destroyed
+		if (bTraceIsHit && TraceResult.GetActor()->Implements<UInteractions>())
+		{
+			IInteractions::Execute_InteractionAction(CurrentInteractable.GetObject(), this, SelectedItemSlot); //sends the message to the interacted actor
+			InteractionSuccessful();  //this sends a message to this characters BP that the event was successful
+			//		UE_LOG(LogTemp, Warning, TEXT("InteractionAction from MentoramaMyCPPCharacter, %f"),FVector::Dist(GetActorLocation(), TraceResult.GetActor()->GetActorLocation())); // cant get location anymore due to the object being destroyed
+		}
 	}
 }
 
-void AMentoramaCPP5Character::InteractionAction_Implementation(AActor* Interactor)
+void AMentoramaCPP5Character::InteractionAction_Implementation(AActor* Interactor, UItemSlot* InteractorItem)
 {
 	// Your implementation here
 	UE_LOG(LogTemp, Warning, TEXT("InteractionAction called into MentoramaMyCPPCharacter"));
@@ -160,8 +163,6 @@ void AMentoramaCPP5Character::AimTrace(bool Debug)
 	FVector StartLocation;
 	FRotator Direction;
 	GetController()->GetPlayerViewPoint(StartLocation, Direction);
-
-	float TraceRange = 600;
 
 	StartLocation = StartLocation +  Direction.Vector() * FVector::Dist(GetActorLocation(), StartLocation);
 	FVector EndTraceController = StartLocation + Direction.Vector() * TraceRange;
@@ -189,7 +190,11 @@ void AMentoramaCPP5Character::AimTrace(bool Debug)
 	{
 		DrawDebugLine(GetWorld(), StartLocation, EndTraceController, FColor::Yellow, false, 1, 0, 2);
 	}
+}
 
+void AMentoramaCPP5Character::SetAbilityPlaying(bool SetState)
+{
+	AbilityPlaying = SetState;
 }
 
 

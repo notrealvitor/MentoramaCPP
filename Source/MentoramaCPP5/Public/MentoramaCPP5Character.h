@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
 #include "StealthGame/Interactions.h"
+#include "StealthGame/ItemSlot.h"
 #include "MentoramaCPP5Character.generated.h"
 
 class USpringArmComponent;
@@ -15,7 +16,6 @@ class UInputAction;
 struct FInputActionValue;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
-
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCurrentInteractionsChanged, TScriptInterface<IInteractions>, NewInteractible);
 
 UCLASS(config=Game)
@@ -80,12 +80,16 @@ public:
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
-	void Interact() ;
+	UFUNCTION(BlueprintCallable)
+	void Interact();
+
+	UPROPERTY(BlueprintReadWrite)
+	UItemSlot* SelectedItemSlot;	
 
 	UFUNCTION(BlueprintImplementableEvent)
 	USceneComponent* GetCamera() const;
 
-	virtual void InteractionAction_Implementation(AActor* Interactor) override; // dont forget to add the public IInteractions into the class call
+	virtual void InteractionAction_Implementation(AActor* Interactor, UItemSlot* InteractorItem) override; // dont forget to add the public IInteractions into the class call
 	
 	UPROPERTY(BlueprintReadWrite)
 	bool bIsAlive = true;
@@ -101,5 +105,13 @@ public:
 
 	UPROPERTY(BlueprintReadOnly)
 	TScriptInterface<IInteractions> CurrentInteractable;
+
+	UPROPERTY(BlueprintReadWrite)
+	float TraceRange = 200;
+
+	UPROPERTY(BlueprintReadWrite)
+	bool AbilityPlaying = false;
+
+	void SetAbilityPlaying(bool SetState);
 };
 

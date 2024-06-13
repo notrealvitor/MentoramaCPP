@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
+#include "ItemAbility.h"
 #include "ItemSlot.generated.h"
 
 UENUM(BlueprintType)
@@ -41,5 +42,12 @@ public:
 	int BaseAttribute; //this could be used for attack damage, defense, amount to heal, etc
 
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly)
-	TEnumAsByte<EItemType> E_ItemType;  //with the item type we can organize better the inventory and standardize its effects 
+	TEnumAsByte<EItemType> E_ItemType;  //with the item type we can organize better the inventory and standardize its effects
+
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly)
+	TSubclassOf<UItemAbility> ItemPrimaryAbility;
+
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly)
+	TSubclassOf<UItemAbility> ItemSecondaryAbility;
+	
 };

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
+#include "ItemSlot.h"
 #include "Interactions.generated.h"
 
 // This class does not need to be modified.
@@ -20,7 +21,7 @@ class MENTORAMACPP5_API IInteractions
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-	void InteractionAction(AActor* Interactor);
+	void InteractionAction(AActor* Interactor, UItemSlot* InteractorItem);
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	FText GetInteractionDescription() const;

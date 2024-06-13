@@ -2,6 +2,7 @@
 
 
 #include "AI_Character.h"
+#include "AIBehaviourComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "MentoramaHelpers.h"
 #include "CP_ActorCalculator.h"
@@ -10,7 +11,6 @@
 #include "MyCPPCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "MyCppBaseMode.h"
-#include "AIBehaviourComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Navigation/PathFollowingComponent.h"
 
@@ -46,7 +46,7 @@ void AAI_Character::BeginPlay()
 {
 	Super::BeginPlay();
 
-	Weapon* weapon = new Weapon(); //m7
+	//Weapon* weapon = new Weapon(); //m7
 
 	SetHealthState();
 
@@ -230,7 +230,7 @@ void AAI_Character::OnMovementFinished()
 	//PrintAction(FString::Printf(TEXT("MOVEMENT FINISHED")), 0);
 }
 
-void AAI_Character::InteractionAction_Implementation(AActor* Interactor)
+void AAI_Character::InteractionAction_Implementation(AActor* Interactor, UItemSlot* InteractorItem)
 {
 	// Your implementation here
 	UE_LOG(LogTemp, Warning, TEXT("InteractionAction called from AI_Character"));
