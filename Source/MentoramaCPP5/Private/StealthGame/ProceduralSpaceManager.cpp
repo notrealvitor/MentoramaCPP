@@ -1,9 +1,23 @@
 #include "StealthGame/ProceduralSpaceManager.h"
 
+#include "EngineUtils.h"
 #include "NavigationSystemTypes.h"
 #include "Engine/World.h"
+#include "NavMesh/NavMeshBoundsVolume.h"
 #include "StealthGame/ProceduralSpace.h"
 #include "StealthGame/TileActor.h"
+#include "NavigationSystem.h"
+#include "Kismet/GameplayStatics.h"
+#include "AI/NavigationSystemBase.h"
+#include "Builders/CubeBuilder.h"
+#include "Components/BrushComponent.h"
+#include "Engine/World.h"
+#include "NavigationSystem.h"
+#include "NavMesh/NavMeshBoundsVolume.h"
+#include "Components/BrushComponent.h"
+#include "AI/NavigationSystemBase.h"
+#include "Engine/Polys.h"
+#include "Model.h"
 
 AProceduralSpaceManager::AProceduralSpaceManager()
 {
@@ -61,29 +75,41 @@ void AProceduralSpaceManager::GenerateNextRoom()
         // Set the actor classes for the new room
         NewRoom->WallActorClass = WallActorClass;
         NewRoom->EntranceActorClass = EntranceActorClass;
-        NewRoom->ExitActorClass = ExitActorClass;   
+        NewRoom->ExitActorClass = ExitActorClass;
+
+        // Pass the spawn map to the new room
+        NewRoom->SpawnMap = SpawnMap;
         
         // Call GenerateGrid on the new room
         SortRowsAndColumns(); //Sort the RoomSize based on how many rooms were created
         NewRoom->GenerateGrid(NewRoomRows, NewRoomColumns);
 
         NewRoom->SpawnedEntranceActor->OnTileActivated.AddDynamic(this, &AProceduralSpaceManager::ProceedToNextRoom);
-        //NewRoom->SpawnedEntranceActor->OnTileActivated.AddDynamic(this, &AProceduralSpaceManager::EraseLastRoom );
-
+        
         if (CreatedRooms.Num() <= 0) //Close the entrance if it is the first room
         {
-            NewRoom->SpawnedEntranceActor->ActivateTile();
-        }
+            NewRoom->SpawnedEntranceActor->ActivateTile();           
+        } 
         
         CreatedRooms.Add(NewRoom); // Keep track of the created room
         TotalRoomsCreatedCounter++;
 
         // Align the new room with the previous one if applicable
-        AlignNewRoomWithPrevious();        
+        AlignNewRoomWithPrevious();
+        NewRoom->SpawnActorsBasedOnMap();
+        
+        FVector NewRoomMidpoint, PreviousRoomMidpoint, NewRoomMSize, PreviousRoomSize;
+        
+        GetActorMidpointAndSize(NewRoom, NewRoomMidpoint, NewRoomMSize);
+        if (StorePreviousRoom)
+        {
+            GetActorMidpointAndSize(StorePreviousRoom, PreviousRoomMidpoint, PreviousRoomSize);
+        }
+        AdjustNavMeshVolume((NewRoomMidpoint + PreviousRoomMidpoint) / 2, NewRoomMSize+PreviousRoomSize);
     }
-    
     else UE_LOG(LogTemp, Warning, TEXT("Failed to create new room"));
 }
+
 
 void AProceduralSpaceManager::AlignNewRoomWithPrevious()
 {
@@ -93,17 +119,17 @@ void AProceduralSpaceManager::AlignNewRoomWithPrevious()
         return;
     }
 
-    AProceduralSpace* PreviousRoom = CreatedRooms[CreatedRooms.Num() - 2];
+    StorePreviousRoom = CreatedRooms[CreatedRooms.Num() - 2];
     AProceduralSpace* LastRoom = CreatedRooms.Last();
 
     // Find the rotation needed to align the rooms
-    FRotator RotationDifference = AlignPassagesRotation(PreviousRoom, LastRoom);
+    FRotator RotationDifference = AlignPassagesRotation(StorePreviousRoom, LastRoom);
 
     // Apply rotation difference
     LastRoom->SetActorRotation(RotationDifference); // Apply rotation difference
 
     // Align the passages' locations
-    AlignPassagesLocation(PreviousRoom, LastRoom);
+    AlignPassagesLocation(StorePreviousRoom, LastRoom);
 }
 
 float AProceduralSpaceManager::CalculateNewRoomRotation(float PreviousConnector, float NewConnector)
@@ -153,8 +179,7 @@ FRotator AProceduralSpaceManager::AlignPassagesRotation(AProceduralSpace* Previo
         {
             NewRoomRotation += 180;
         }
-
-        UE_LOG(LogTemp, Warning, TEXT("XROOM %f with %f -> NewRoomRotation: %f /// PreviousRoom: %s"), PreviousConnectorYaw, NewConnectorYaw, NewRoomRotation, *PreviousRoomConnector->GetName());
+        
         return FRotator(0.0f, NewRoomRotation, 0.0f);
     }
     return FRotator::ZeroRotator;
@@ -272,4 +297,74 @@ void AProceduralSpaceManager::ProceedToNextRoom()
         UE_LOG(LogTemp, Error, TEXT("Not enough rooms in CreatedRooms array. The system needs at least two rooms created to work"));
     }
     
+}
+
+void AProceduralSpaceManager::AdjustNavMeshVolume(const FVector& NewLocation, const FVector& NewExtent)
+{
+    if (NavMeshVolume)
+    {
+        // Adjust the location and extent of the NavMeshBoundsVolume
+        NavMeshVolume->SetActorLocation(NewLocation);
+        NavMeshVolume->SetActorScale3D(NewExtent);
+
+        // Update the brush settings
+        UBrushComponent* BrushComponent = NavMeshVolume->GetBrushComponent();
+        if (BrushComponent)
+        {
+            BrushComponent->SetMobility(EComponentMobility::Static);
+            BrushComponent->bAlwaysCreatePhysicsState = true;
+
+            // Update the brush transform
+            FTransform BrushTransform;
+            BrushTransform.SetLocation(NewLocation);
+            BrushTransform.SetScale3D(NewExtent); // Use the extent directly as the scale
+            BrushComponent->SetWorldTransform(BrushTransform);
+
+            // Rebuild the brush collision
+            BrushComponent->BuildSimpleBrushCollision();
+            BrushComponent->ReregisterComponent();
+        }
+
+        // Get the navigation system and update the navigation bounds
+        UNavigationSystemV1* NavSys = FNavigationSystem::GetCurrent<UNavigationSystemV1>(GetWorld());
+        if (NavSys)
+        {
+            NavSys->OnNavigationBoundsUpdated(NavMeshVolume);
+        }
+    }
+}
+
+void AProceduralSpaceManager::GetActorMidpointAndSize(AActor* Actor, FVector& OutMidpoint, FVector& OutSize) const
+{
+    if (Actor)
+    {
+        FVector Origin, BoxExtent;
+        Actor->GetActorBounds(false, Origin, BoxExtent);
+
+        FVector Min = Origin - BoxExtent;
+        FVector Max = Origin + BoxExtent;
+
+        // Include bounds of attached actors
+        TArray<AActor*> AttachedActors;
+        Actor->GetAttachedActors(AttachedActors);
+        for (AActor* AttachedActor : AttachedActors)
+        {
+            FVector AttachedOrigin, AttachedBoxExtent;
+            AttachedActor->GetActorBounds(false, AttachedOrigin, AttachedBoxExtent);
+
+            FVector AttachedMin = AttachedOrigin - AttachedBoxExtent;
+            FVector AttachedMax = AttachedOrigin + AttachedBoxExtent;
+
+            Min = Min.ComponentMin(AttachedMin);
+            Max = Max.ComponentMax(AttachedMax);
+        }
+
+        OutMidpoint = (Min + Max) / 2;
+        OutSize = Max - Min;
+    }
+    else
+    {
+        OutMidpoint = FVector::ZeroVector;
+        OutSize = FVector::ZeroVector;
+    }
 }

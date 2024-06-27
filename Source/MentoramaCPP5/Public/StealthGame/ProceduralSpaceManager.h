@@ -3,7 +3,10 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "StealthGame/ProceduralSpace.h"
+#include "NavMesh/NavMeshBoundsVolume.h"
 #include "StealthGame/TileActor.h" // Include the header for ATileActor
+
+
 #include "ProceduralSpaceManager.generated.h"
 
 UCLASS()
@@ -55,6 +58,25 @@ public:
 
 	UFUNCTION(CallInEditor, Category="RoomGeneration")
 	void ProceedToNextRoom();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="RoomGeneration")
+	TMap<TSubclassOf<ATileActor>, float> SpawnMap;
+
+	AProceduralSpace* StorePreviousRoom;
+
+
+public:
+	// Function to adjust the NavMesh volume's location and size
+	UFUNCTION(BlueprintCallable, Category = "RoomGeneration")
+	void AdjustNavMeshVolume(const FVector& NewLocation, const FVector& NewExtent);
+	void GetActorMidpointAndSize(AActor* Actor, FVector& OutMidpoint, FVector& OutSize) const;
+	
+
+protected:
+	// Reference to the NavMeshBoundsVolume set in the Blueprint
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RoomGeneration")
+	ANavMeshBoundsVolume* NavMeshVolume;
+	
 
 private:
 	TArray<AProceduralSpace*> CreatedRooms; // Keep track of created rooms

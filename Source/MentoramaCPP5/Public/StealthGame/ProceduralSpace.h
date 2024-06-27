@@ -50,6 +50,9 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid Settings")
     float ExitEntranceDistancePercentage = 35.0f;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid Settings")
+    float GroundTileHeight = 25.1f;
+
     UFUNCTION(BlueprintCallable, Category = "Grid Settings")
     void GenerateGrid(int32 RowsNewValue, int32 ColumnsNewValue);
 
@@ -64,8 +67,20 @@ public:
     FVector CalculateGridCenter() const;
     FLinearColor DetermineTileColor(const FVector& Location) const;
 
-    //inline void HandleEntranceActivated() { OnEntranceActivated.Broadcast(); };     //Not used but I wanted to learn the inline method  
-    //inline void HandleExitActivated(void) { OnExitActivated.Broadcast(); };                  
+    //inline void HandleEntranceActivated() { OnEntranceActivated.Broadcast(); };     //Not used anymore but I wanted to learn the inline method  
+
+    UPROPERTY(BlueprintReadWrite, Category="Spawning")
+    TMap<TSubclassOf<ATileActor>, float> SpawnMap;
+
+    void SpawnActorsBasedOnMap();
+    FVector GetRandomGroundTile();
+    FVector GetRandomLocationInRoom();
+    bool IsLocationValid(const FVector& Location);
+
+    void SaveGroundTileLocations();
+
+    TArray<FVector> GroundTileLocations;
+    
 
 private:
     void SpawnTiles(const FVector& GridCenter, const TPair<FVector, FVector>& EntrancePair, const TPair<FVector, FVector>& ExitPair);
@@ -78,7 +93,6 @@ private:
     ATileActor* SpawnActor(TSubclassOf<ATileActor> ActorClass, const FVector& Location, const FRotator& Rotation, FActorSpawnParameters& SpawnParams, int32 Index);
     ATileActor* SpawnActor(TSubclassOf<ATileActor> ActorClass, const FVector& Location, const FRotator& Rotation, FActorSpawnParameters& SpawnParams);
 
-    FString DetermineTileSide(const FVector& Location) const;
 
 
 };

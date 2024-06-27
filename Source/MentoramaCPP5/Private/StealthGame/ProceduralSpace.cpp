@@ -1,6 +1,7 @@
 #include "StealthGame/ProceduralSpace.h"
 #include "StealthGame/TileActor.h"
 #include "Engine/World.h"
+#include "DrawDebugHelpers.h" 
 #include "GameFramework/Actor.h"
 
 AProceduralSpace::AProceduralSpace()
@@ -19,7 +20,6 @@ void AProceduralSpace::BeginPlay()
 void AProceduralSpace::Destroyed()
 {
     Super::Destroyed();
-    UE_LOG(LogTemp, Warning, TEXT("AProceduralSpace::Destroyed called"));
     ClearGrid();
 }
 
@@ -48,7 +48,7 @@ void AProceduralSpace::GenerateGrid(int32 RowsNewValue, int32 ColumnsNewValue)
         return;
     }
     
-    if (RowsNewValue != 0)      Rows = RowsNewValue;  
+    if (RowsNewValue != 0)      Rows = RowsNewValue;  //if value is zero, use the defaults
     if (ColumnsNewValue != 0)   Rows = ColumnsNewValue; 
     
     FVector GridCenter = CalculateGridCenter();
@@ -94,11 +94,6 @@ void AProceduralSpace::SpawnTiles(const FVector& GridCenter, const TPair<FVector
                 {
                     ATileActor* WallActor = SpawnActor(WallActorClass, Location, Rotation, SpawnParams, Index);
                     Index++;
-                    if (WallActor)
-                    {
-                        FString Side = DetermineTileSide(Location);
-                        WallActor->TileType = Side;
-                    }
                 }
             }
             else
@@ -107,7 +102,7 @@ void AProceduralSpace::SpawnTiles(const FVector& GridCenter, const TPair<FVector
                 Index++;
             }
         }
-    }
+    }   
 }
 
 ATileActor* AProceduralSpace::SpawnActor(TSubclassOf<ATileActor> ActorClass, const FVector& Location, const FRotator& Rotation, FActorSpawnParameters& SpawnParams, int32 Index)
@@ -138,27 +133,6 @@ ATileActor* AProceduralSpace::SpawnActor(TSubclassOf<ATileActor> ActorClass, con
         NewActor->SetTileColor(Color);
     }
     return NewActor;
-}
-
-FString AProceduralSpace::DetermineTileSide(const FVector& Location) const
-{
-    if (Location.X == GetActorLocation().X) // Left
-    {
-        return "LeftEdge";
-    }
-    else if (Location.X == GetActorLocation().X + (Rows - 1) * TileSize) // Right
-    {
-        return "RightEdge";
-    }
-    else if (Location.Y == GetActorLocation().Y) // Bottom
-    {
-        return "BottomEdge";
-    }
-    else if (Location.Y == GetActorLocation().Y + (Columns - 1) * TileSize) // Top
-    {
-        return "TopEdge";
-    }
-    return "Middle";
 }
 
 TArray<TPair<FVector, FVector>> AProceduralSpace::CollectEdgeLocationPairs()
@@ -215,15 +189,13 @@ bool AProceduralSpace::FindValidEntranceExitPairs(const TArray<TPair<FVector, FV
     float GridDiagonal = FVector::Dist(FVector(0, 0, 0), FVector(Rows * TileSize, Columns * TileSize, 0));
     float MinDistance = (ExitEntranceDistancePercentage / 100.0f) * GridDiagonal;
 
-    UE_LOG(LogTemp, Warning, TEXT("Total edge pairs: %d"), EdgePairs.Num());
-
-    while (!bValidPairFound && EdgePairs.Num() >= 2)
+     while (!bValidPairFound && EdgePairs.Num() >= 2)
     {
         int32 EntranceIndex = FMath::RandRange(0, EdgePairs.Num() - 1);
         EntrancePair = EdgePairs[EntranceIndex];
         EdgePairs.RemoveAt(EntranceIndex);
 
-        UE_LOG(LogTemp, Warning, TEXT("Selected Entrance Pair: %s and %s"), *EntrancePair.Key.ToString(), *EntrancePair.Value.ToString());
+        //UE_LOG(LogTemp, Warning, TEXT("Selected Entrance Pair: %s and %s"), *EntrancePair.Key.ToString(), *EntrancePair.Value.ToString());
 
         for (int32 i = 0; i < EdgePairs.Num(); ++i)
         {
@@ -234,30 +206,12 @@ bool AProceduralSpace::FindValidEntranceExitPairs(const TArray<TPair<FVector, FV
             if (Distance >= MinDistance)
             {
                 bValidPairFound = true;
-                UE_LOG(LogTemp, Warning, TEXT("Selected Exit Pair: %s and %s with Distance: %f"), *ExitPair.Key.ToString(), *ExitPair.Value.ToString(), Distance);
+                //UE_LOG(LogTemp, Warning, TEXT("Selected Exit Pair: %s and %s with Distance: %f"), *ExitPair.Key.ToString(), *ExitPair.Value.ToString(), Distance);
                 break;
             }
         }
     }
     return bValidPairFound;
-}
-
-FVector AProceduralSpace::CalculateGridCenter() const
-{
-    return FVector((Rows - 1) * TileSize / 2.0f, (Columns - 1) * TileSize / 2.0f, 0.0f);
-}
-
-bool AProceduralSpace::IsEdgeTile(int32 Row, int32 Column) const
-{
-    return Row == 0 || Column == 0 || Row == Rows - 1 || Column == Columns - 1;
-}
-
-bool AProceduralSpace::IsCornerTile(int32 Row, int32 Column) const
-{
-    return (Row == 0 && Column == 0) ||
-           (Row == 0 && Column == Columns - 1) ||
-           (Row == Rows - 1 && Column == 0) ||
-           (Row == Rows - 1 && Column == Columns - 1);
 }
 
 bool AProceduralSpace::HandleEntranceExitTiles(const FVector& Location, const TPair<FVector, FVector>& EntrancePair, const TPair<FVector, FVector>& ExitPair, const FVector& GridCenter, FActorSpawnParameters& SpawnParams)
@@ -288,6 +242,139 @@ bool AProceduralSpace::HandleEntranceExitTiles(const FVector& Location, const TP
     }
 
     return false;
+}
+
+
+void AProceduralSpace::SpawnActorsBasedOnMap()
+{
+    SaveGroundTileLocations();
+    
+    for (const auto& Elem : SpawnMap)
+    {
+        TSubclassOf<ATileActor> ActorClass = Elem.Key;
+        float SpawnChance = Elem.Value;
+
+        float RandomValue = FMath::FRand();
+        if (RandomValue <= SpawnChance)
+        {
+            float SpawnZOffset = GroundTileHeight;
+            FVector RandomLocation = GetRandomGroundTile() ; 
+            if (IsLocationValid(RandomLocation))
+            {
+                FRotator Rotation = FRotator::ZeroRotator;
+                FActorSpawnParameters SpawnParams;
+                ATileActor* NewActor = GetWorld()->SpawnActor<ATileActor>(ActorClass, RandomLocation, Rotation, SpawnParams);
+                if (NewActor)
+                {
+                    NewActor->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+                }
+            }
+        }
+    }
+}
+
+FVector AProceduralSpace::GetRandomGroundTile()
+{
+    if (GroundTileLocations.Num() > 0)
+    {
+        int32 RandomIndex = FMath::RandRange(0, GroundTileLocations.Num() - 1);
+        FVector SelectedTile = GroundTileLocations[RandomIndex];
+        SelectedTile.Z += GroundTileHeight; // Adjust Z to be above the ground level
+        return SelectedTile;
+    }
+
+    // Return a default location if no ground tile is found (shouldn't happen)
+    return GetActorLocation();
+}
+
+FVector AProceduralSpace::GetRandomLocationInRoom()
+{
+    // Verify and log the actor's name for debugging
+
+
+    float MinX = GetActorLocation().X + TileSize; // Avoid the left wall
+    float MaxX = GetActorLocation().X + (Rows - 2) * TileSize; // Avoid the right wall
+    float MinY = GetActorLocation().Y + TileSize; // Avoid the bottom wall
+    float MaxY = GetActorLocation().Y + (Columns - 2) * TileSize; // Avoid the top wall
+
+    float RandomX = FMath::FRandRange(MinX, MaxX);
+    float RandomY = FMath::FRandRange(MinY, MaxY);
+
+    float SpawnZOffset = GroundTileHeight;; // Offset to spawn slightly above the ground
+
+    return FVector(RandomX, RandomY, GetActorLocation().Z + SpawnZOffset); // Adjust Z to be above the ground level
+}
+
+bool AProceduralSpace::IsLocationValid(const FVector& Location)
+{
+    // Verify and log the actor's name for debugging
+    FString ActorName = GetName();
+    //UE_LOG(LogTemp, Warning, TEXT("Validating location for Actor: %s at Location: %s"), *ActorName, *Location.ToString());
+
+    // Example: Simple overlap check with other actors
+    FCollisionQueryParams QueryParams;
+    QueryParams.AddIgnoredActor(this); // Ignore the current actor
+
+    FHitResult HitResult;
+    FVector BoxHalfSize(TileSize / 2.1, TileSize / 2.1, TileSize / 2.1); // Half size of the box
+    FVector BoxLocation = Location + FVector(0, 0, TileSize / 2); // Offset the box a bit higher
+
+    bool bHit = GetWorld()->SweepSingleByChannel(
+        HitResult,
+        BoxLocation,
+        BoxLocation,
+        FQuat::Identity,
+        ECC_Visibility,
+        FCollisionShape::MakeBox(BoxHalfSize),
+        QueryParams
+    );
+
+    // Draw a debug box at the location being checked
+    DrawDebugBox(GetWorld(), BoxLocation + FVector3d(TileSize / 2,TileSize / 2,0), BoxHalfSize, FColor::Blue, false, 20.0f);
+
+    // Log the result of the collision check for debugging
+    if (bHit)
+    {
+        if (HitResult.GetActor())
+        {
+            UE_LOG(LogTemp, Warning, TEXT("Location %s is not valid: hit %s"), *BoxLocation.ToString(), *HitResult.GetActor()->GetName());
+        }
+        else
+        {
+            UE_LOG(LogTemp, Warning, TEXT("Location %s is not valid: hit something"), *BoxLocation.ToString());
+        }
+        // Draw a red debug box if the location is not valid
+        DrawDebugBox(GetWorld(), BoxLocation + FVector3d(TileSize / 2,TileSize / 2,0), BoxHalfSize, FColor::Red, false, 20.0f);
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Location %s is valid"), *BoxLocation.ToString());
+        // Draw a green debug box if the location is valid
+        DrawDebugBox(GetWorld(), BoxLocation + FVector3d(TileSize / 2,TileSize / 2,0), BoxHalfSize, FColor::Green, false, 20.0f);
+    }
+
+    return !bHit;
+}
+
+void AProceduralSpace::SaveGroundTileLocations()
+{
+    GroundTileLocations.Empty(); // Clear the array before populating
+
+    FVector ActorLocation = GetActorLocation();
+    FRotator ActorRotation = GetActorRotation();
+    FTransform ActorTransform = GetActorTransform();
+
+    for (int32 Row = 1; Row < Rows - 1; ++Row)
+    {
+        for (int32 Column = 1; Column < Columns - 1; ++Column)
+        {
+            FVector LocalTileLocation = FVector(Row * TileSize, Column * TileSize, 0);
+            FVector WorldTileLocation = ActorTransform.TransformPosition(LocalTileLocation);
+            GroundTileLocations.Add(WorldTileLocation);
+        }
+    }
+
+    UE_LOG(LogTemp, Warning, TEXT("Ground tile locations saved. Total: %d"), GroundTileLocations.Num());
 }
 
 FRotator AProceduralSpace::CalculateFacingRotation(const FVector& Location) const
@@ -347,4 +434,22 @@ FLinearColor AProceduralSpace::DetermineTileColor(const FVector& Location) const
     }
 
     return Color;
+}
+
+FVector AProceduralSpace::CalculateGridCenter() const
+{
+    return FVector((Rows - 1) * TileSize / 2.0f, (Columns - 1) * TileSize / 2.0f, 0.0f);
+}
+
+bool AProceduralSpace::IsEdgeTile(int32 Row, int32 Column) const
+{
+    return Row == 0 || Column == 0 || Row == Rows - 1 || Column == Columns - 1;
+}
+
+bool AProceduralSpace::IsCornerTile(int32 Row, int32 Column) const
+{
+    return (Row == 0 && Column == 0) ||
+           (Row == 0 && Column == Columns - 1) ||
+           (Row == Rows - 1 && Column == 0) ||
+           (Row == Rows - 1 && Column == Columns - 1);
 }
