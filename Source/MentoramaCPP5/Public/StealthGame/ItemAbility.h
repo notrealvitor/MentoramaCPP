@@ -6,6 +6,7 @@
 #include "AbilityAnimNotifyState.h"
 #include "Animation/AnimMontage.h"
 #include "UObject/NoExportTypes.h"
+#include "Tickable.h"
 #include "ItemAbility.generated.h"
 
 class APlayerController;
@@ -15,22 +16,36 @@ class UAnimNotifyState;
 class UAbilityAnimNotify;
 
 UCLASS(Blueprintable)
-class MENTORAMACPP5_API UItemAbility : public UObject
+class MENTORAMACPP5_API UItemAbility : public UObject, public FTickableGameObject
 {
 	GENERATED_BODY()
 
 public:
 	UItemAbility();
+
+	// Begin FTickableGameObject interface
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Ability")
+	void Tick(float DeltaTime);
 	
+	virtual TStatId GetStatId() const override;
+	virtual bool IsTickable() const override;
+	// End FTickableGameObject interface
+
+	UFUNCTION(BlueprintCallable, Category = "Ability")
+	void SetTickEnabled(bool bEnabled);
+	
+	// End UObject interface
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemAbility)
 	TArray<UAnimMontage*> AbilityMontage;
-
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemAbility)
 	float AnimSpeed = 1.0f;
 
 	UPROPERTY(BlueprintReadWrite, Category = ItemAbility)
 	int ComboIndex;
+
+	UPROPERTY(BlueprintReadWrite, Category = ItemAbility)
+	class UItemSlot* ItemSlot;
 
 
 	//this setup allows us to set the trigger ability implementation and then overwrite it in blueprints if necessary
@@ -48,7 +63,6 @@ public:
 	UAbilityAnimNotifyState* AbilityNotifyState;
 
 	void SetMontageNotifiesOwners();
-	void ResetComboIndexIfInactive();
 	void PlayAbilityMontage();
 	
 	void AdviseInternalInterruptMontage();
@@ -66,6 +80,10 @@ public:
 	bool ComboOnStateEnding = true; //still testing, lets keep true for no
 
 	void ResetFlowVariables();
+
+private:
+	bool bTickEnabled;
+	
 protected:
 	UFUNCTION()
 	void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted);

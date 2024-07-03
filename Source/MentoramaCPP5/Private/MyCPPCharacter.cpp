@@ -5,7 +5,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
-
 #include "MyCppBaseMode.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -30,10 +29,7 @@ AMyCPPCharacter::AMyCPPCharacter()
 
 void AMyCPPCharacter::BeginPlay()
 {
-	Health = MaxHealth;
 	Super::BeginPlay();
-	TArray<AActor*> FoundActors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AMyCPPCharacter::StaticClass(), FoundActors);
 
 	//Add Input Mapping Context
 	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
@@ -57,18 +53,12 @@ void AMyCPPCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	// Set up action bindings
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
-		// Jumping
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &AMyCPPCharacter::StunnableJump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
-
-		// Moving
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AMyCPPCharacter::Move);
-
-		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AMyCPPCharacter::Look);
-
-		// Interact
-		//EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &AMyCPPCharacter::Interact);
+		//This is being handled in the StealthChar BP
+		//EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &AMyCPPCharacter::Interact); 
 	}
 	else
 	{
@@ -78,35 +68,32 @@ void AMyCPPCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 
 void AMyCPPCharacter::Move(const FInputActionValue& Value)
 {
-	// input is a Vector2D
-	FVector2D MovementVector = Value.Get<FVector2D>();
-
-	if (Controller != nullptr && !AbilityPlaying)
+	if (!bIsStunned)
 	{
-		// find out which way is forward
-		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
+		// input is a Vector2D
+		FVector2D MovementVector = Value.Get<FVector2D>();
 
-		// get forward vector
-		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-	
-		// get right vector 
-		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+		if (Controller != nullptr && !AbilityPlaying)
+		{
+			// find out which way is forward
+			const FRotator Rotation = Controller->GetControlRotation();
+			const FRotator YawRotation(0, Rotation.Yaw, 0);
 
-		// add movement 
-		AddMovementInput(ForwardDirection, MovementVector.Y);
-		AddMovementInput(RightDirection, MovementVector.X);
+			const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+			const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+
+			AddMovementInput(ForwardDirection, MovementVector.Y);
+			AddMovementInput(RightDirection, MovementVector.X);
+		}				
 	}
 }
 
 void AMyCPPCharacter::Look(const FInputActionValue& Value)
 {
-	// input is a Vector2D
 	FVector2D LookAxisVector = Value.Get<FVector2D>();
 
 	if (Controller != nullptr)
 	{
-		// add yaw and pitch input to controller
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
@@ -154,7 +141,6 @@ void AMyCPPCharacter::Interact()
 		{
 			IInteractions::Execute_InteractionAction(CurrentInteractable.GetObject(), this, SelectedItemSlot); //sends the message to the interacted actor
 			InteractionSuccessful();  //this sends a message to this characters BP that the event was successful
-			//UE_LOG(LogTemp, Warning, TEXT("InteractionAction from MentoramaMyCPPCharacter, %f"),FVector::Dist(GetActorLocation(), TraceResult.GetActor()->GetActorLocation())); // cant get location anymore due to the object being destroyed
 		}
 	}
 }
@@ -175,7 +161,6 @@ void AMyCPPCharacter::HandleDamage(int Damage)
 	OnMyHealthChanged.Broadcast(Health);
 	if(Health <= 0)
 	{
-		ShowDeathFeedback();
 		auto* gameMode = GetWorld()->GetAuthGameMode<AMyCppBaseMode>();
 		if(!IsValid(gameMode))
 		{
@@ -192,6 +177,10 @@ void AMyCPPCharacter::HandleCollectibles(int Collected)
 }
 
 
-
-
-
+void AMyCPPCharacter::StunnableJump()
+{
+	if (!bIsStunned)
+	{
+		Jump();
+	}
+}

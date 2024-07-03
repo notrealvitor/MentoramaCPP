@@ -43,6 +43,7 @@ public:
 	UFUNCTION(CallInEditor, Category="RoomGeneration")
 	void GenerateNextRoom();
 
+	UPROPERTY(BlueprintReadOnly, Category="RoomGeneration" )
 	int TotalRoomsCreatedCounter = 0;
 	
 	int32 NewRoomRows = 5;

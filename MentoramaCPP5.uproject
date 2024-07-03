@@ -12,7 +12,8 @@
 				"Engine",
 				"AIModule",
 				"ModelViewViewModel",
-				"CoreUObject"
+				"CoreUObject",
+				"UMG"
 			]
 		}
 	],

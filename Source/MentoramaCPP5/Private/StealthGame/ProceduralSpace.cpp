@@ -289,9 +289,6 @@ FVector AProceduralSpace::GetRandomGroundTile()
 
 FVector AProceduralSpace::GetRandomLocationInRoom()
 {
-    // Verify and log the actor's name for debugging
-
-
     float MinX = GetActorLocation().X + TileSize; // Avoid the left wall
     float MaxX = GetActorLocation().X + (Rows - 2) * TileSize; // Avoid the right wall
     float MinY = GetActorLocation().Y + TileSize; // Avoid the bottom wall
@@ -307,7 +304,6 @@ FVector AProceduralSpace::GetRandomLocationInRoom()
 
 bool AProceduralSpace::IsLocationValid(const FVector& Location)
 {
-    // Verify and log the actor's name for debugging
     FString ActorName = GetName();
     //UE_LOG(LogTemp, Warning, TEXT("Validating location for Actor: %s at Location: %s"), *ActorName, *Location.ToString());
 
@@ -330,7 +326,7 @@ bool AProceduralSpace::IsLocationValid(const FVector& Location)
     );
 
     // Draw a debug box at the location being checked
-    DrawDebugBox(GetWorld(), BoxLocation + FVector3d(TileSize / 2,TileSize / 2,0), BoxHalfSize, FColor::Blue, false, 20.0f);
+    /*DrawDebugBox(GetWorld(), BoxLocation + FVector3d(TileSize / 2,TileSize / 2,0), BoxHalfSize, FColor::Blue, false, 20.0f);
 
     // Log the result of the collision check for debugging
     if (bHit)
@@ -351,7 +347,7 @@ bool AProceduralSpace::IsLocationValid(const FVector& Location)
         UE_LOG(LogTemp, Warning, TEXT("Location %s is valid"), *BoxLocation.ToString());
         // Draw a green debug box if the location is valid
         DrawDebugBox(GetWorld(), BoxLocation + FVector3d(TileSize / 2,TileSize / 2,0), BoxHalfSize, FColor::Green, false, 20.0f);
-    }
+    }*/
 
     return !bHit;
 }

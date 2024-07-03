@@ -8,10 +8,10 @@ UCharacterStatsComponent::UCharacterStatsComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 
 	// Initialize default values
-	Health = MaxHealth;
 	MaxHealth = 100.0f;
-	Mana = MaxMana;
+	Health = MaxHealth;
 	MaxMana = 50.0f;
+	Mana = MaxMana;	
 	IsAlive = true;
 	Strength = 10.0f;
 	Agility = 10.0f;
@@ -23,7 +23,6 @@ UCharacterStatsComponent::UCharacterStatsComponent()
 	Defense = 5.0f;
 }
 
-// Called when the game starts
 void UCharacterStatsComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -51,6 +50,7 @@ void UCharacterStatsComponent::Heal(float HealAmount)
 void UCharacterStatsComponent::Die()
 {
 	IsAlive = false;
+	OnDeath.Broadcast();
 	// Handle death logic here (e.g., disable character, play death animation)
 }
 

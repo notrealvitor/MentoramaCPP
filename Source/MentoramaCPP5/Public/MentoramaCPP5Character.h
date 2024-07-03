@@ -6,7 +6,6 @@
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
 #include "StealthGame/Interactions.h"
-#include "StealthGame/ItemSlot.h"
 #include "MentoramaCPP5Character.generated.h"
 
 class USpringArmComponent;
@@ -24,10 +23,6 @@ class AMentoramaCPP5Character : public ACharacter ,public IInteractions
 {
 	GENERATED_BODY()
 
-
-public:
-	AMentoramaCPP5Character(); //this character is parent for the Player Character and also the AI Characters, only stuff regarding both should be added
-
 protected:
 
 	// To add mapping context
@@ -35,16 +30,45 @@ protected:
 
 	virtual void Tick(float DeltaSeconds) override;
 
+
 public:
-	UFUNCTION(BlueprintCallable)
+	AMentoramaCPP5Character(); //this character is parent for the Player Character and also the AI Characters, only stuff regarding both should be added
+
+	UFUNCTION(BlueprintCallable, Category = "NotCharacter")
 	virtual void Interact();
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite, Category = "NotCharacter")
 	bool AbilityPlaying = false;
+
+	UPROPERTY(BlueprintReadWrite, Category = "NotCharacter")
+	float Cooldown = 0;
+
+	UPROPERTY(BlueprintReadWrite, Category = "NotCharacter")
+	bool bIsStunned;
 
 	void SetAbilityPlaying(bool SetState);
 
 	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI") //this stopped being valid for some reason, had to implement from blueprint
 	// UCharacterStatsComponent* CharacterStatsComp;
+
+	UFUNCTION(BlueprintCallable, Category = "NotCharacter")
+	void ApplyRotationOverTime(FRotator TargetRotation, float Duration);
+
+	//Being stunned means the character should not be able to do actions like attack, move or jump
+	UFUNCTION(BlueprintCallable, Category = "NotCharacter")
+	void GetStunned(float Duration = 0.1f);
+
+private:
+	// Helper function
+	void RotateActor();
+	void ResetStunned();
+	FTimerHandle StunnedTimerHandle;
+
+	// Member variables to store rotation details
+	FRotator InitialRotation;
+	FRotator DesiredRotation;
+	float TotalDuration;
+	float TimeElapsed;
+	FTimerHandle TimerHandle_Rotation;
 };
 

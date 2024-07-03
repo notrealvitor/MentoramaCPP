@@ -49,5 +49,11 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly)
 	TSubclassOf<UItemAbility> ItemSecondaryAbility;
+
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly)
+	int InteractionTraceRange = 200;
+
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly)
+	float Cooldown = 0;
 	
 };

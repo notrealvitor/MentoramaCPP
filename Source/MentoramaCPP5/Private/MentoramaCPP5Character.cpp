@@ -67,4 +67,44 @@ void AMentoramaCPP5Character::SetAbilityPlaying(bool SetState)
 	AbilityPlaying = SetState;
 }
 
+void AMentoramaCPP5Character::ApplyRotationOverTime(FRotator InTargetRotation, float Duration)
+{
+	DesiredRotation = InTargetRotation;
+	TotalDuration = Duration;
+	TimeElapsed = 0.0f;
+	InitialRotation = GetActorRotation();
 
+	// Start the timer to call RotateActor at a regular interval
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle_Rotation, this, &AMentoramaCPP5Character::RotateActor, GetWorld()->GetDeltaSeconds(), true);
+}
+
+void AMentoramaCPP5Character::RotateActor()
+{
+	TimeElapsed += GetWorld()->GetDeltaSeconds();
+
+	// Calculate the current interpolation alpha value
+	float Alpha = FMath::Clamp(TimeElapsed / TotalDuration, 0.0f, 1.0f);
+
+	// Interpolate the rotation towards the desired rotation
+	FRotator NewRotation = FMath::Lerp(InitialRotation, DesiredRotation, Alpha);
+
+	// Set the new rotation
+	SetActorRotation(NewRotation);
+
+	// Check if the rotation is complete
+	if (Alpha >= 1.0f)
+	{
+		GetWorld()->GetTimerManager().ClearTimer(TimerHandle_Rotation);
+	}
+}
+
+void AMentoramaCPP5Character::GetStunned(float Duration)
+{
+	bIsStunned = true;
+	GetWorld()->GetTimerManager().SetTimer(StunnedTimerHandle, this, &AMentoramaCPP5Character::ResetStunned, Duration, false);
+}
+
+void AMentoramaCPP5Character::ResetStunned()
+{
+	bIsStunned = false;
+}

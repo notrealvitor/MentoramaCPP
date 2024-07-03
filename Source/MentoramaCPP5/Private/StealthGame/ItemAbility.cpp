@@ -9,9 +9,11 @@
 #include "Animation/AnimInstance.h"
 #include "Animation/AnimMontage.h"
 #include "Animation/AnimNotifies/AnimNotifyState.h"
+#include "Logging/StructuredLog.h"
 
 
 UItemAbility::UItemAbility()
+	: bTickEnabled(false)
 {
 	UWorld* World = GetWorld();
 	if (World)
@@ -21,12 +23,35 @@ UItemAbility::UItemAbility()
 	}	
 }
 
+void UItemAbility::Tick_Implementation(float DeltaTime)
+{
+	UE_LOG(LogTemp, Warning, TEXT("UTickableUObject is ticking"));
+}
+
+TStatId UItemAbility::GetStatId() const
+{
+	RETURN_QUICK_DECLARE_CYCLE_STAT(UTickableUObject, STATGROUP_Tickables);
+}
+
+bool UItemAbility::IsTickable() const
+{
+	return bTickEnabled;
+}
+
+void UItemAbility::SetTickEnabled(bool bEnabled)
+{
+	bTickEnabled = bEnabled;
+}
+
+
 void UItemAbility::TriggerAbility_Implementation()
 {
 	if (!PlayerControllerReference) return;			
 	if (!PlayerCharacter)  return;
 		if (!PlayerCharacter->AbilityPlaying)
 		{
+			PlayerCharacter->Cooldown = ItemSlot->Cooldown;
+			UE_LOGFMT(LogTemp, Error, "How much is the itemslot CooldDown:: ->> {}", ItemSlot->Cooldown);
 			UE_LOG(LogTemp, Warning, TEXT("CANCOMBO %s, AbilityPLaying %s, IsInCombo %s"),CanCombo ? TEXT("true") : TEXT("false"), PlayerCharacter->AbilityPlaying ? TEXT("true") : TEXT("false"), IsInCombo ? TEXT("true") : TEXT("false"));
 			if (CanCombo)
 			{
@@ -86,14 +111,7 @@ void UItemAbility::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 	{
 		
 		if (!bIsInternalInterrupt)
-		{	//MAYBE WE SHOULD LET THE ON DAMAGE DEAL WITH THIS
-			// PlayerCharacter->SetAbilityPlaying(false);
-			// if (ComboIndex >= AbilityMontage.Num())//-1) // we dont add the -1 here because the ComboIndex is incremented after the execution
-			// {
-			// 	ComboIndex = 0;
-			// }
-			// ResetFlowVariables();
-			// ResetComboIndexIfInactive();
+		{	
 			UE_LOG(LogTemp, Warning, TEXT("Animation Montage Interrupted by an external actor."));
 		}
 		else
@@ -111,7 +129,6 @@ void UItemAbility::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 		{
 			ResetFlowVariables();
 		}
-		else ResetComboIndexIfInactive();				
 		UE_LOG(LogTemp, Log, TEXT("Animation Montage Ended."));		
 	}
 }
@@ -152,23 +169,3 @@ void UItemAbility::SetMontageNotifiesOwners() 	//here we want to look if our cus
 		}
 	}
 }
-
-void UItemAbility::ResetComboIndexIfInactive()
-{
-	//CHECK IF SHOULD RESET INDEX
-	// float CurrentGameTime = 0.0f;
-	// if (GetWorld())
-	// {
-	// 	CurrentGameTime = GetWorld()->GetTimeSeconds();
-	// } else return;
-	// if (CurrentGameTime - LastCallTime > 3)
-	// {
-	// 	UE_LOG(LogTemp, Warning, TEXT("More than 1 second has passed since the last call, setting the ComboIndex back to zero."));
-	// 	ComboIndex = 0;
-	// 	LastCallTime = GetWorld()->GetTimeSeconds();
-	// }
-}
-
-
-
-
