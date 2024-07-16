@@ -1,7 +1,4 @@
 #include "StealthGame/ProceduralSpaceManager.h"
-
-#include "EngineUtils.h"
-#include "NavigationSystemTypes.h"
 #include "Engine/World.h"
 #include "NavMesh/NavMeshBoundsVolume.h"
 #include "StealthGame/ProceduralSpace.h"
@@ -9,15 +6,10 @@
 #include "NavigationSystem.h"
 #include "Kismet/GameplayStatics.h"
 #include "AI/NavigationSystemBase.h"
-#include "Builders/CubeBuilder.h"
 #include "Components/BrushComponent.h"
 #include "Engine/World.h"
-#include "NavigationSystem.h"
-#include "NavMesh/NavMeshBoundsVolume.h"
-#include "Components/BrushComponent.h"
-#include "AI/NavigationSystemBase.h"
-#include "Engine/Polys.h"
 #include "Model.h"
+#include "Logging/StructuredLog.h"
 
 AProceduralSpaceManager::AProceduralSpaceManager()
 {
@@ -54,7 +46,7 @@ void AProceduralSpaceManager::SortRowsAndColumns()
 { 
     int32 N = 7 + (TotalRoomsCreatedCounter/2);
     NewRoomRows = FMath::RandRange(5, N);           //less than 5  will break the room
-    NewRoomColumns = FMath::RandRange(5, N);        //less than 5  will break the room
+    NewRoomColumns = FMath::RandRange(5, N);        //less than 5  will break the room    
 }
 
 void AProceduralSpaceManager::GenerateNextRoom()
@@ -72,6 +64,7 @@ void AProceduralSpaceManager::GenerateNextRoom()
 
     if (NewRoom)
     {
+        NewRoom->RoomNumber = TotalRoomsCreatedCounter;
         // Set the actor classes for the new room
         NewRoom->WallActorClass = WallActorClass;
         NewRoom->EntranceActorClass = EntranceActorClass;
@@ -82,17 +75,19 @@ void AProceduralSpaceManager::GenerateNextRoom()
         
         // Call GenerateGrid on the new room
         SortRowsAndColumns(); //Sort the RoomSize based on how many rooms were created
+        
         NewRoom->GenerateGrid(NewRoomRows, NewRoomColumns);
 
         NewRoom->SpawnedEntranceActor->OnTileActivated.AddDynamic(this, &AProceduralSpaceManager::ProceedToNextRoom);
         
-        if (CreatedRooms.Num() <= 0) //Close the entrance if it is the first room
+        if (CreatedRooms.Num() <= 0) //Close the entrance if it is the first room, the closing next door bug is not from here(already tried commenting it out)
         {
             NewRoom->SpawnedEntranceActor->ActivateTile();           
         } 
         
         CreatedRooms.Add(NewRoom); // Keep track of the created room
         TotalRoomsCreatedCounter++;
+        
 
         // Align the new room with the previous one if applicable
         AlignNewRoomWithPrevious();

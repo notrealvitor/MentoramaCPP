@@ -20,6 +20,9 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category="Tile Settings")
 	FString TileType;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grid Settings")
+	int RoomNumber;
+
 	UPROPERTY(BlueprintReadOnly, Category="Tile Settings")
 	FLinearColor DebugColor; //this is not only for debug, I ended up using it for the reference of the side of the wall in the manager
 
@@ -38,6 +41,9 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UStaticMeshComponent* StaticMeshComponent;
+
 public:    
 	virtual void Tick(float DeltaTime) override;
 
@@ -45,6 +51,5 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	USceneComponent* RootSceneComponent;
 
-	UPROPERTY(VisibleAnywhere)
-	UStaticMeshComponent* StaticMeshComponent;
+
 };

@@ -3,6 +3,7 @@
 #include "Engine/World.h"
 #include "DrawDebugHelpers.h" 
 #include "GameFramework/Actor.h"
+#include "Logging/StructuredLog.h"
 
 AProceduralSpace::AProceduralSpace()
 {
@@ -65,6 +66,7 @@ void AProceduralSpace::GenerateGrid(int32 RowsNewValue, int32 ColumnsNewValue)
     {
         UE_LOG(LogTemp, Warning, TEXT("Valid entrance and exit pairs not found."));
     }
+ 
 }
 
 void AProceduralSpace::TestGrid()
@@ -84,6 +86,7 @@ void AProceduralSpace::SpawnTiles(const FVector& GridCenter, const TPair<FVector
             FRotator Rotation = FRotator::ZeroRotator;
             FActorSpawnParameters SpawnParams;
 
+            //spawn walls and doors
             if (IsEdgeTile(Row, Column))
             {
                 if (HandleEntranceExitTiles(Location, EntrancePair, ExitPair, GridCenter, SpawnParams))
@@ -93,16 +96,18 @@ void AProceduralSpace::SpawnTiles(const FVector& GridCenter, const TPair<FVector
                 else
                 {
                     ATileActor* WallActor = SpawnActor(WallActorClass, Location, Rotation, SpawnParams, Index);
+                    WallActor->RoomNumber = RoomNumber; //this number ID comes from the ProceduralSpaceSManager
                     Index++;
                 }
             }
             else
             {
+                //spawn the ground
                 SpawnActor(TileActorClass, Location, Rotation, SpawnParams, Index);
                 Index++;
             }
         }
-    }   
+    }
 }
 
 ATileActor* AProceduralSpace::SpawnActor(TSubclassOf<ATileActor> ActorClass, const FVector& Location, const FRotator& Rotation, FActorSpawnParameters& SpawnParams, int32 Index)
@@ -118,6 +123,7 @@ ATileActor* AProceduralSpace::SpawnActor(TSubclassOf<ATileActor> ActorClass, con
 
         FLinearColor Color = DetermineTileColor(Location);
         NewActor->SetTileColor(Color);
+        NewActor->RoomNumber = RoomNumber; //this number ID comes from the ProceduralSpaceSManager
     }
     return NewActor;
 }
@@ -131,6 +137,7 @@ ATileActor* AProceduralSpace::SpawnActor(TSubclassOf<ATileActor> ActorClass, con
 
         FLinearColor Color = DetermineTileColor(Location);
         NewActor->SetTileColor(Color);
+        NewActor->RoomNumber = RoomNumber; //this number ID comes from the ProceduralSpaceSManager
     }
     return NewActor;
 }
@@ -240,7 +247,6 @@ bool AProceduralSpace::HandleEntranceExitTiles(const FVector& Location, const TP
         }
         return true;
     }
-
     return false;
 }
 
@@ -267,6 +273,7 @@ void AProceduralSpace::SpawnActorsBasedOnMap()
                 if (NewActor)
                 {
                     NewActor->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+                    NewActor->RoomNumber = RoomNumber; //this number ID comes from the ProceduralSpaceSManager
                 }
             }
         }

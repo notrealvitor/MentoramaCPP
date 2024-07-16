@@ -3,9 +3,8 @@
 
 #include "StealthGame/InventoryComponent.h"
 #include "MentoramaGameInstance.h"
-#include "ContentBrowserDataSource.h"
-#include "IDetailTreeNode.h"
-#include "Math/UnitConversion.h"
+//#include "IDetailTreeNode.h"
+//#include "Math/UnitConversion.h"
 #include "StealthGame/ItemSlot.h"
 
 // Sets default values for this component's properties

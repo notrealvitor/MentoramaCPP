@@ -83,6 +83,9 @@ public:
 
 private:
 	bool bTickEnabled;
+
+	void EnableMeleeCollisions();
+	void DisableMeleeCollisions();
 	
 protected:
 	UFUNCTION()

@@ -41,6 +41,9 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid Settings")
     TSubclassOf<ATileActor> ExitActorClass;
 
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grid Settings")
+    int RoomNumber;
+
     UPROPERTY(BlueprintReadOnly, Category = "Grid Settings")
     ATileActor* SpawnedEntranceActor;
 

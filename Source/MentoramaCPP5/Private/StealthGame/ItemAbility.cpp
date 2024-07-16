@@ -51,10 +51,11 @@ void UItemAbility::TriggerAbility_Implementation()
 		if (!PlayerCharacter->AbilityPlaying)
 		{
 			PlayerCharacter->Cooldown = ItemSlot->Cooldown;
-			UE_LOGFMT(LogTemp, Error, "How much is the itemslot CooldDown:: ->> {}", ItemSlot->Cooldown);
+			UE_LOGFMT(LogTemp, Error, "How much is the itemslot CooldDown: -> {0}", ItemSlot->Cooldown);
 			UE_LOG(LogTemp, Warning, TEXT("CANCOMBO %s, AbilityPLaying %s, IsInCombo %s"),CanCombo ? TEXT("true") : TEXT("false"), PlayerCharacter->AbilityPlaying ? TEXT("true") : TEXT("false"), IsInCombo ? TEXT("true") : TEXT("false"));
 			if (CanCombo)
 			{
+				EnableMeleeCollisions(); //THIS COLLISION IS BETTER TO BE ACTIVATED IN THE NOTIFY OF THE ANIMATIONS, THIS IS JUST FOR PROTOTYPING 
 				PlayerCharacter->SetAbilityPlaying(true);
 				IsInCombo = true;
 				CanCombo = false;
@@ -62,12 +63,15 @@ void UItemAbility::TriggerAbility_Implementation()
 				ComboIndex = FMath::Clamp(ComboIndex, 0, AbilityMontage.Num() - 1);
 				AdviseInternalInterruptMontage();
 				PlayAbilityMontage();
+				
 			}
 			else if (!IsInCombo)			
 			{
+				
+				EnableMeleeCollisions(); //THIS COLLISION IS BETTER TO BE ACTIVATED IN THE NOTIFY OF THE ANIMATIONS, THIS IS JUST FOR PROTOTYPING 
 				PlayerCharacter->SetAbilityPlaying(true);
 				ResetFlowVariables();
-				PlayAbilityMontage();
+				PlayAbilityMontage();		
 				
 			}
 			
@@ -105,6 +109,30 @@ void UItemAbility::ResetFlowVariables()
 	ComboIndex = 0;
 }
 
+void UItemAbility::EnableMeleeCollisions()
+{
+	//THIS COLLISION IS BETTER TO BE ACTIVATED IN THE NOTIFY OF THE ANIMATIONS, THIS IS JUST FOR PROTOTYPING 
+	for (auto& CollisionComponent : PlayerCharacter->SpawnedMeleeCollisions)
+	{
+		if (CollisionComponent && CollisionComponent->CustomCollisionBox)
+		{
+			CollisionComponent->CustomCollisionBox->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		}
+	}
+}
+
+void UItemAbility::DisableMeleeCollisions()
+{
+		//THIS COLLISION IS BETTER TO BE ACTIVATED IN THE NOTIFY OF THE ANIMATIONS, THIS IS JUST FOR PROTOTYPING 
+		for (auto& CollisionComponent : PlayerCharacter->SpawnedMeleeCollisions)
+		{
+			if (CollisionComponent && CollisionComponent->CustomCollisionBox)
+			{
+				CollisionComponent->CustomCollisionBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			}
+		}
+}
+
 void UItemAbility::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
 	if (bInterrupted) 
@@ -119,11 +147,13 @@ void UItemAbility::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 			UE_LOG(LogTemp, Log, TEXT("Animation Montage Interrupted intentionally by the character."));
 		}
 		bIsInternalInterrupt = false; //should set back to false until next advise
+		DisableMeleeCollisions();
 		
 	}
 	else
 	{
 		PlayerCharacter->SetAbilityPlaying(false);
+		DisableMeleeCollisions();
 		IsInCombo = false;
 		if (ComboIndex >= AbilityMontage.Num() - 1 ) // we dont add the -1 here because the ComboIndex is incremented after the execution
 		{

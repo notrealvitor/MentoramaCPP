@@ -36,6 +36,7 @@ void UCharacterStatsComponent::TakeDamage(float DamageAmount)
 		Health = 0.0f;
 		Die();
 	}
+	OnHealthChanged.Broadcast();
 }
 
 void UCharacterStatsComponent::Heal(float HealAmount)
@@ -45,6 +46,7 @@ void UCharacterStatsComponent::Heal(float HealAmount)
 	{
 		Health = MaxHealth;
 	}
+	OnHealthChanged.Broadcast();
 }
 
 void UCharacterStatsComponent::Die()

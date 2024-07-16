@@ -13,6 +13,7 @@ UNotPlayerProperties::UNotPlayerProperties()
 	TotalCurrency = 0;
 	CurrentCurrency = 0;
 	CurrentRound = 0;
+	Health = 100;
 }
 
 void UNotPlayerProperties::PostInitProperties()

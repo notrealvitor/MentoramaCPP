@@ -45,7 +45,7 @@ void UCounterWidget::UpdateDisplayTypeDetails()
         int32 Minutes = TotalSeconds / 60;
         int32 Seconds = TotalSeconds % 60;
         DisplayText = FString::Printf(TEXT("%02d:%02d:%02d"), Minutes, Seconds, TotalMilliseconds);
-        UE_LOG(LogTemp, Warning, TEXT("Current Value: %d to TIME: %d:%02d:%02d"), Value, Minutes, Seconds, TotalMilliseconds);
+        //UE_LOG(LogTemp, Warning, TEXT("Current Value: %d to TIME: %d:%02d:%02d"), Value, Minutes, Seconds, TotalMilliseconds);
         break;
     }
 case EDisplayType::DT_Standard:
@@ -77,7 +77,7 @@ void UCounterWidget::StartCounter(float UpdateInterval)
 
 void UCounterWidget::UpdateCounter()
 {
-    UE_LOG(LogTemp, Log, TEXT("UpdateCounter called. Current Value: %d, IncreaseRatio: %f, TargetValue: %d"), Value, IncreaseRatio, TargetValue);
+    //UE_LOG(LogTemp, Log, TEXT("UpdateCounter called. Current Value: %d, IncreaseRatio: %f, TargetValue: %d"), Value, IncreaseRatio, TargetValue);
 
     if (FMath::Abs(IncreaseRatio) < KINDA_SMALL_NUMBER)
     {

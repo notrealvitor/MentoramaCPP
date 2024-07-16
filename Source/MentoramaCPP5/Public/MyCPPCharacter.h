@@ -61,6 +61,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "MyCPPCharacter")
 	void HandleDamage(int Damage);
 
+
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	USpringArmComponent* CameraBoom;
@@ -98,12 +100,15 @@ protected:
 	UPROPERTY(BlueprintAssignable)
 	FOnCurrentInteractionsChanged OnCurrentInteractionsChanged;
 
+	UPROPERTY(BlueprintReadOnly)
+	FHitResult TraceResult;
+
 private:
 	void AimTrace(bool Debug);
 	void StunnableJump();
 	void Interact();
 	bool bTraceIsHit;
-	FHitResult TraceResult;
+
 	TArray<AActor> Characters;
 	
 };

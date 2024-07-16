@@ -3,6 +3,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Util/ColorConstants.h"
+#include "Logging/StructuredLog.h"
 
 // Sets default values
 ATileActor::ATileActor()
@@ -19,6 +20,7 @@ ATileActor::ATileActor()
 	StaticMeshComponent->SetupAttachment(RootComponent);
 
 	DebugColor = FLinearColor::Black;
+
 }
 
 // Called when the game starts or when spawned

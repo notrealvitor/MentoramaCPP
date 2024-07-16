@@ -16,6 +16,24 @@ enum EItemType
 	Equipment
 };
 
+USTRUCT(BlueprintType)
+struct FItemCollisionType
+{
+	GENERATED_BODY()
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	FName SocketAttached = "hand_rSocket";
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	FVector LocationOffset = FVector(-45.0f,0.0f,0.0f);
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	FVector CollisionExtent = FVector(40.0f,8.0f,8.0f);
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	FName CollisionPreset = "MeleeBox";
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	FName AddTag = "";
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	bool DebugCollision = false;
+};
+
 UCLASS()
 class MENTORAMACPP5_API UItemSlot : public UPrimaryDataAsset
 {
@@ -52,6 +70,9 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly)
 	int InteractionTraceRange = 200;
+
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly)
+	TArray<FItemCollisionType> ItemCollisions;
 
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly)
 	float Cooldown = 0;

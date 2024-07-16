@@ -39,6 +39,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, FieldNotify, Setter, Getter)
 	TArray<FInventorySlot> InventorySlots;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, FieldNotify, Setter, Getter)
+	float Health;
+
 	
 
 protected:
@@ -105,6 +108,17 @@ public:
 	int32 GetCurrentCurrency() const
 	{
 		return CurrentCurrency;
+	}
+
+	//Current Health
+	void SetHealth(float NewHealth)
+	{
+		UE_MVVM_SET_PROPERTY_VALUE(Health, NewHealth);
+	}
+
+	float GetHealth() const
+	{
+		return Health;
 	}
 
 //InventorySlots

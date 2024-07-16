@@ -176,7 +176,6 @@ void AMyCPPCharacter::HandleCollectibles(int Collected)
 	OnMyCollectiblesChanged.Broadcast(Collectibles);
 }
 
-
 void AMyCPPCharacter::StunnableJump()
 {
 	if (!bIsStunned)

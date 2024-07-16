@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
 #include "StealthGame/Interactions.h"
+#include "StealthGame/MeleeCollisionBox.h"
 #include "MentoramaCPP5Character.generated.h"
 
 class USpringArmComponent;
@@ -58,6 +59,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "NotCharacter")
 	void GetStunned(float Duration = 0.1f);
 
+	UPROPERTY(BlueprintReadWrite)
+	TArray<AMeleeCollisionBox*> SpawnedMeleeCollisions;
+
 private:
 	// Helper function
 	void RotateActor();
@@ -70,5 +74,6 @@ private:
 	float TotalDuration;
 	float TimeElapsed;
 	FTimerHandle TimerHandle_Rotation;
+
 };
 
