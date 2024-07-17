@@ -107,11 +107,12 @@ void UItemAbility::ResetFlowVariables()
 	IsInCombo = false;
 	CanCombo = false;
 	ComboIndex = 0;
+	bIsInternalInterrupt = false;
 }
 
 void UItemAbility::EnableMeleeCollisions()
 {
-	//THIS COLLISION IS BETTER TO BE ACTIVATED IN THE NOTIFY OF THE ANIMATIONS, THIS IS JUST FOR PROTOTYPING 
+	//THIS COLLISION IS BETTER TO BE ACTIVATED IN THE NOTIFY OF THE ANIMATIONS, THIS IS MORE FOR PROTOTYPING 
 	for (auto& CollisionComponent : PlayerCharacter->SpawnedMeleeCollisions)
 	{
 		if (CollisionComponent && CollisionComponent->CustomCollisionBox)
@@ -123,7 +124,7 @@ void UItemAbility::EnableMeleeCollisions()
 
 void UItemAbility::DisableMeleeCollisions()
 {
-		//THIS COLLISION IS BETTER TO BE ACTIVATED IN THE NOTIFY OF THE ANIMATIONS, THIS IS JUST FOR PROTOTYPING 
+		//THIS COLLISION IS BETTER TO BE ACTIVATED IN THE NOTIFY OF THE ANIMATIONS, THIS IS MORE FOR PROTOTYPING 
 		for (auto& CollisionComponent : PlayerCharacter->SpawnedMeleeCollisions)
 		{
 			if (CollisionComponent && CollisionComponent->CustomCollisionBox)
@@ -137,17 +138,21 @@ void UItemAbility::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
 	if (bInterrupted) 
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Animation Montage Interrupted, but by who"));
 		
 		if (!bIsInternalInterrupt)
 		{	
 			UE_LOG(LogTemp, Warning, TEXT("Animation Montage Interrupted by an external actor."));
+			ResetFlowVariables();
+			PlayerCharacter->SetAbilityPlaying(false);
+			DisableMeleeCollisions();
 		}
 		else
 		{
 			UE_LOG(LogTemp, Log, TEXT("Animation Montage Interrupted intentionally by the character."));
 		}
 		bIsInternalInterrupt = false; //should set back to false until next advise
-		DisableMeleeCollisions();
+		
 		
 	}
 	else
